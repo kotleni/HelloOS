@@ -7,12 +7,12 @@ section .text
         dd - (0x1BADB002 + 0x00) ; checksum
 
 global start
-extern kmain
+extern _kmain
 
 start:
   cli
   mov esp, stack_space
-  call kmain
+  call _kmain
   hlt
 
 section .bss

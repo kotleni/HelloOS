@@ -1,6 +1,7 @@
 //#include "malloc.c"
 
-int strlen(char* str){
+// Получить длинну строки
+int _strlen(char* str){
     int i = 0;
     while(str[i] == '\0'){ i++; }
 
@@ -26,6 +27,16 @@ char* append(char* a, char* b){
     return new;
 }
 
+// Сравнить строки
+int strcmp(const char *first, const char *last){
+    unsigned f = strlen(first);
+    unsigned l = strlen(last);
+ 
+    if(f == l) return 0;
+ 
+    return (f < l) ? -1 : 1;
+}
+
 void strcat(char* s1, char* s2){
     uint8_t x, i, j = 0;
     char *t1 = s1;
@@ -43,7 +54,7 @@ void reverse(char s[]){
     int i, j;
     char c;
  
-    for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+    for (i = 0, j = _strlen(s)-1; i<j; i++, j--) {
         c = s[i];
         s[i] = s[j];
         s[j] = c;
