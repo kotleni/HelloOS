@@ -6,6 +6,7 @@
 #include "drv/keyboard_ps2.h"
 
 #include "misc/utils.h"
+#include "misc/string.h"
 #include "sys/api.h"
 
 void init();
@@ -16,25 +17,11 @@ void kmain() {
     init();
     println("\n Hello OS ^pv0.2 ^r|^w Tiny operating system for x86");
 
-
     char* line;
     for(;;){
-        key->num = -1;
         line = malloc(sizeof(char*) * 8);
-        print("\n >");
-        for(;;){
-            key = readkey();
-
-            if(key->num == 0x1c)
-                break;
-
-            if(key->ascii != "?"){
-                strcat(line, key->ascii);
-                print(key->ascii);
-            }
-        }
-
-        //println(line);
+        readline(line, true);
+        
         cmd(line);
     }
 }
