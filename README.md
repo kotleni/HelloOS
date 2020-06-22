@@ -1,4 +1,4 @@
-![HelloOS](https://github.com/qbaddev/helloos/raw/master/screen.png)
+![HelloOS](https://github.com/qbaddev/HelloOS/raw/master/screen.jpg)
 <br>
 # HelloOS
  Простая операционная система для x86 процессоров.<br/>
@@ -6,7 +6,7 @@
  
 # Сделано
 * Текстовый display драйвер
-* Keyboard PS2 драйвер (кривой)
+* Keyboard PS2 драйвер
 * malloc (+ free)
 * itoa (кривой), strlen
 * Работа с портами (ports.c)
