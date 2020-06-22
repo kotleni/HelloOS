@@ -1,27 +1,51 @@
 #include "misc/types.h"
-#include "misc/ports.c"
-#include "misc/malloc.c"
-#include "misc/utils.c"
-#include "drv/display_t.c"
-#include "drv/keyboard_ps2.c"
+#include "misc/ports.h"
+#include "misc/malloc.h"
 
-void kmain(void){
-    // Подготовка
-    port_byte_out(0x21, 0xFD); // Keyboard
-    vid_clear();
-    
-    vid_puts("\nHelloOS ^p[^wv0^p]^w (^r>.<^w)\n >> ");
+#include "drv/display_t.h"
+#include "drv/keyboard_ps2.h"
 
+#include "misc/utils.h"
+#include "sys/api.h"
+
+void init();
+void cmd(char* line);
+
+KeyboardKey* key;
+void kmain() {
+    init();
+    println("\n Hello OS ^pv0.2 ^r|^w Tiny operating system for x86");
+
+
+    char* line;
     for(;;){
-        struct KeyboardKey* key = keyboard_ps2_read();
-        if(key->num <= 128 && key->num > 0){
-            if(key->state)
-                if(0 == strcmp(sc_name[key->num], (const char*)"Enter")){
-                    vid_putch('\n');
-                }else{
-                    vid_puts(key->ascii);
-                }
+        key->num = -1;
+        line = malloc(sizeof(char*) * 8);
+        print("\n >");
+        for(;;){
+            key = readkey();
+
+            if(key->num == 0x1c)
+                break;
+
+            if(key->ascii != "?"){
+                strcat(line, key->ascii);
+                print(key->ascii);
+            }
         }
+
+        //println(line);
+        cmd(line);
     }
-    return;
+}
+
+void cmd(char* line) {
+    if(strcmp(line, "cls") == 0){
+        clear_screen();
+    }
+}
+
+void init() {
+    keyboard_ps2_init();
+    clear_screen();
 }

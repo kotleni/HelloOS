@@ -1,4 +1,5 @@
-(Нуждаюсь во втром разработчике)
+![HelloOS](https://github.com/qbaddev/helloos/raw/master/screen.png)
+<br>
 # HelloOS
  Простая операционная система для x86 процессоров.<br/>
  (qemu-system-i386 -kernel bin/kernel.bin)

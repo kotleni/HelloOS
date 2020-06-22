@@ -20,7 +20,7 @@ struct node * point;
 
 void splitSegment(struct node *ptr, int size){
 
-    if (((void *)(((temp = (struct node *)((void *)ptr + sizeof(struct node) + size)) + 1)) >= (void *)(&array[25000]))){
+    if (((void *)(((temp = (struct node *)((char *)ptr + sizeof(struct node) + size)) + 1)) >= (void *)(&array[25000]))){
         return;
     }
     
@@ -63,7 +63,7 @@ void * malloc(int size){
                 
                    point->status = 1;
 
-                   return ((void *)((sizeof(struct node)+(void *)point)));
+                   return ((void *)((sizeof(struct node)+(char *)point)));
 
                }
             }
@@ -90,7 +90,7 @@ void free(void * ptr){
 
     struct node *pre = NULL;
     while(point){
-        if ((void *)((void *)root + sizeof(struct node)) == ptr)
+        if ((void *)((char *)root + sizeof(struct node)) == ptr)
         {
            root->status=0;
 
@@ -100,7 +100,7 @@ void free(void * ptr){
             return;
         }
 
-        if((void *)((void *)point+sizeof(struct node))==ptr){ //*
+        if((void *)((char *)point+sizeof(struct node))==ptr){ //*
             point->status=0;
             //struct node *tempPtr=point;
 
@@ -127,15 +127,3 @@ void free(void * ptr){
     }
     return;
 }
-
-/*
-void printMyMemmory(){
-    point = root;
-    while(point){
-
-        printf("Point :%p\t\n\tStatus\t:%d\n\tSize\t:%d\n\tNext\t:%p\n", point, point->status, point->size, point->next);
-        point = point->next;
-    }
-    return;
-    
-}*/
