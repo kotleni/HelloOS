@@ -43,6 +43,10 @@ void cmd(char* line) {
     if(strcmp(line, "cls") == 0){
         clear_screen();
     }
+    
+    if(strcmp(line, "help") == 0){
+        println("\nCommands list:\ncls - Clear screen\nhelp - This message");
+    }
 }
 
 void init() {

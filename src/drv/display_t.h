@@ -47,8 +47,10 @@ void display_putch(char c) {
         skip = 1;
     }
 
-    if (MAX_ROW <= row)
+    if (MAX_ROW <= row){
         row = 0;
+        display_clear();
+    }
 
     if (!skip){
         vidptr[(row * MAX_COL + col) * 2] = c;
