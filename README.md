@@ -1,7 +1,7 @@
 ![HelloOS](https://github.com/qbaddev/HelloOS/raw/master/screen.jpg)
 <br>
 ## HelloOS
- Простая операционная система для x86 процессоров.<br/>
+Попытка сделать простую операционную систему для x86 процессоров.<br/>
  
 >### Сделано
 >* Текстовый Display драйвер (display_t.h)
