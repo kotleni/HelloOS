@@ -9,6 +9,8 @@
 #include "misc/string.h"
 #include "sys/api.h"
 
+#define INPUT_BUFF_SIZE 8
+
 void init();
 void cmd(char* line);
 
@@ -19,7 +21,7 @@ void kmain() {
 
     char* line;
     for(;;){
-        line = malloc(sizeof(char*) * 8);
+        line = malloc(sizeof(char*) * INPUT_BUFF_SIZE);
         readline(line, true);
         
         cmd(line);
