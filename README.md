@@ -5,15 +5,23 @@
 <br>
 ## HelloOS
 Попытка сделать простую операционную систему для x86 процессоров.<br/>
- 
->### Сделано
->* Текстовый Display драйвер (display_t.h)
->* Keyboard PS2 драйвер (keyboard_ps2.h)
->* malloc (+ free) (malloc.h)
->* Работа с портами (ports.c)
+
+## ToDo
+- [x] Базовое ядро
+- [x] malloc (malloc.h)
+- [x] Работа с портами (ports.c)
+- [ ] Драйверы
+    - [x] Текстовый display (display_t.h)
+    - [x] PS2 Keyboard (keyboard_ps2.h)
+    - [ ] PS2 Mouse
+    - [ ] HDD
+    - [ ] VGA
+- [ ] FS
+    - [ ] fat32
+    - [ ] ext3
+    - [ ] ntfs
+- [ ] Поддержка других платформ
+- [ ] Поддержка программ
 
 ### Запуск в qemu
 ```qemu-system-i386 -kernel bin/kernel.bin```
-
-<br>
-<b>Подсказка: </b>В коде всегда можно получить версию с некоторыми изменениями
