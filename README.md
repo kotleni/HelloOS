@@ -1,3 +1,6 @@
+## helloos-kernel
+Ядро для HelloOS<br>
+
 ![HelloOS](https://github.com/qbaddev/HelloOS/raw/master/screen.jpg)
 <br>
 ## HelloOS
