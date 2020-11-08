@@ -12,7 +12,7 @@ extern kmain
 start:
   cli
   mov esp, stack_space
-  call kmain
+  call kmain ; вызываем функцию из c++
   hlt
 
 section .bss
