@@ -1,5 +1,7 @@
 #pragma once
 
+#include <malloc.h>
+
 #define MAX_ROW 25
 #define MAX_COL 80
 
@@ -26,3 +28,11 @@ typedef struct {
     unsigned char attr;
     char *vidptr;
 } Display;
+
+void display_init();
+
+void display_clear();
+
+void display_putch(char c);
+
+void display_puts(char* str);

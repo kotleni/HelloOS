@@ -4,6 +4,8 @@
 Display* display;
 
 void display_init() {
+    display = malloc(sizeof(Display*));
+    
     display->row = 0;
     display->col = 0;
     display->attr = WHITE;
