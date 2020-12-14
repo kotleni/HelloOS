@@ -24,6 +24,20 @@ void display_clear() {
     display->row = 0;
 }
 
+void display_setcur(int x, int y) {
+    if(x > MAX_COL) { x = MAX_COL; };
+    if(x < 0) { x = 0; };
+    if(y > MAX_ROW) { y = MAX_ROW; };
+    if(y < 0) { y = 0; };
+    
+    display->col = x;
+    display->row = y;
+}
+
+void display_movecur(int dx, int dy) {
+    display_setcur(display->col + dx, display->row + dy);
+}
+
 void display_putch(char c) {
     int skip = 0;
     if (c == '\n' || MAX_COL <= display->col){

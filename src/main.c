@@ -7,12 +7,29 @@
 
 void readline(char* line) {
     KeyboardKey* key;
+    int cursor = 0;
     for(;;) {
         key = keyboard_read();
 
-        if(key->num == 28) { break; } else {
-            display_puts(key->ascii);
+        if(key->num == 28)
+        {
+            break;
+        }
+        else if(key->num == 14) {
+            if(cursor == 0) { continue; }
+            
+            cursor--;
+            line[cursor] = '\0';
+            
+            display_movecur(-1, 0);
+            display_putch('\0');
+            display_movecur(-1, 0);
+        }
+        else {
             strcat(line, key->ascii);
+            display_putch(line[cursor]);
+            
+            cursor++;
         }
     }
 }
