@@ -1,11 +1,13 @@
-#include <string.h>
-#include <ports.h>
-#include <malloc.h>
+#include <misc/string.h>
+#include <misc/ports.h>
+#include <misc/malloc.h>
 
-#include <display.h>
-#include <keyboard.h>
+#include <drv/display.h>
+#include <drv/keyboard.h>
 
-void readline(char* line) {
+#include <defines.h>
+
+void readInput(char* line) {
     KeyboardKey* key;
     for(;;) {
         key = keyboard_read();
@@ -24,15 +26,17 @@ void kmain() {
 
     // title
     display_clear();
-    display_puts("Hello OS! v0.3\n");
+    display_puts((char*) motd);
+    display_puts("\nVersion: "); display_puts((char*) version); display_puts("\n");
+    display_puts("Malloc: "); display_puts(itoa(getRamSize() / 1024)); display_puts(" MB\n");
 
     // loop
     char* line = malloc(sizeof(char*) * 64);
     for(;;) {
         memset(line, 0x00, sizeof(char*) * 64);
 
-        display_puts("\n^p>^w ");
-        readline(line);
+        display_puts((char*) shell);
+        readInput(line);
 
         display_puts("\nUnknown command ");
         display_puts(line);

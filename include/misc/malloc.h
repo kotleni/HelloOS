@@ -5,6 +5,7 @@
 
 void* malloc(int size);
 void myFree(void *fre);
+int getRamSize();
 
 struct node{
     int size;

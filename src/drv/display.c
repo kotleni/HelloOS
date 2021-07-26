@@ -1,11 +1,11 @@
-#include <display.h>
+#include <drv/display.h>
 
 // char* vidptr = (char*)0xb8000;
 Display* display;
 
 void display_init() {
     display = malloc(sizeof(Display*));
-    
+
     display->row = 0;
     display->col = 0;
     display->attr = WHITE;

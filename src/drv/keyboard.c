@@ -1,4 +1,4 @@
-#include <keyboard.h>
+#include <drv/keyboard.h>
 
 // Таблица ASCII символов
 const char *sc_ascii[] = { "?", "?", "1", "2", "3", "4", "5", "6",

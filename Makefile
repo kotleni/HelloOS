@@ -9,7 +9,7 @@ all:
 	ld -m elf_i386 -T link.ld -o bin/kernel bin/boot.o bin/main.o bin/display.o bin/keyboard.o bin/ports.o bin/malloc.o bin/string.o
 
 run:
-	qemu-system-i386 -kernel bin/kernel
+	qemu-system-i386 -kernel bin/kernel -m 128M
 
 clean:
 	rm -rf bin/

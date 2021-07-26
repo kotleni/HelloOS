@@ -6,10 +6,10 @@ section .text
         dd 0x00                  ; flags
         dd - (0x1BADB002 + 0x00) ; checksum
 
-global _start
+global start
 extern kmain
 
-_start:
+start:
   cli
   mov esp, stack_space
   call kmain ; вызываем функцию из c++

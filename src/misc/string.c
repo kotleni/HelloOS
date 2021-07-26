@@ -1,3 +1,5 @@
+#include <misc/string.h>
+
 // Добавить к строке строку
 int strcat_i;
 void strcat(char* s, const char* t){
@@ -46,8 +48,8 @@ void reverse(char s[]){
     }
 }
 
-// int to char
-void itoa(int n, char* s){
+char* itoa(int n){
+    char* s = (char*) malloc(sizeof(char) * 32);
     int i, sign;
 
     if ((sign = n) < 0)  /* записываем знак */

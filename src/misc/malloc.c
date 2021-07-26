@@ -1,4 +1,4 @@
-#include <malloc.h>
+#include <misc/malloc.h>
 
 char array[MAX] = {'\0'};
 
@@ -114,4 +114,8 @@ void free(void * ptr){
         point=point->next;
     }
     return;
+}
+
+int getRamSize() {
+   return MAX;
 }

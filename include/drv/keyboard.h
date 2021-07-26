@@ -1,7 +1,7 @@
 #pragma once
 
-#include <malloc.h>
-#include <ports.h>
+#include <misc/malloc.h>
+#include <misc/ports.h>
 
 #define SC_MAX 57
 #define SC_MIN 0
