@@ -29,7 +29,7 @@ void display_setcur(int x, int y) {
     if(x < 0) { x = 0; };
     if(y > MAX_ROW) { y = MAX_ROW; };
     if(y < 0) { y = 0; };
-    
+
     display->col = x;
     display->row = y;
 }
