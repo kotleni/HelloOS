@@ -1,3 +1,5 @@
+/* HelloOS */
+
 #include <misc/malloc.h>
 
 char array[MAX] = {'\0'};

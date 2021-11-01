@@ -1,6 +1,7 @@
+/* HelloOS */
+
 #include <drv/display.h>
 
-// char* vidptr = (char*)0xb8000;
 Display* display;
 
 void display_init() {

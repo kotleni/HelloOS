@@ -1,3 +1,5 @@
+/* HelloOS */
+
 #include <misc/string.h>
 #include <misc/ports.h>
 #include <misc/malloc.h>
@@ -19,10 +21,10 @@ void readInput(char* line) {
         }
         else if(key->num == 14) {
             if(cursor == 0) { continue; }
-            
+
             cursor--;
             line[cursor] = '\0';
-            
+
             display_movecur(-1, 0);
             display_putch('\0');
             display_movecur(-1, 0);
@@ -30,7 +32,7 @@ void readInput(char* line) {
         else {
             strcat(line, key->ascii);
             display_putch(line[cursor]);
-            
+
             cursor++;
         }
     }

@@ -1,6 +1,8 @@
+/* HelloOS */
+
 #include <drv/keyboard.h>
 
-// Таблица ASCII символов
+// ascii table
 const char *sc_ascii[] = { "?", "?", "1", "2", "3", "4", "5", "6",
     "7", "8", "9", "0", "-", "=", "?", "?", "q", "w", "e", "r", "t", "y", // 14 - backspace
         "u", "i", "o", "p", "[", "]", "?", "?", "a", "s", "d", "f", "g", // 28 - enter
@@ -9,7 +11,7 @@ const char *sc_ascii[] = { "?", "?", "1", "2", "3", "4", "5", "6",
 
 KeyboardKey* k;
 
-// Ожидать нажатие клавиши без проверки
+// wait keypress without
 KeyboardKey* keyboard_read_unsafe() {
     while(!(port_byte_in(0x64) & 0x01)){
         port_byte_out(0x20 , 0x20);
@@ -19,7 +21,7 @@ KeyboardKey* keyboard_read_unsafe() {
     k->ascii = (char*)sc_ascii[k->num];
 }
 
-// Ожидать нажатие клавиши
+// wait keypress
 KeyboardKey* keyboard_read() {
     for(;;){
         keyboard_read_unsafe();
@@ -28,7 +30,7 @@ KeyboardKey* keyboard_read() {
     }
 }
 
-// Инициализировать клавиатуру
+// initialize keyboard
 void keyboard_init() {
     port_byte_out(0x21, 0xFD);
 

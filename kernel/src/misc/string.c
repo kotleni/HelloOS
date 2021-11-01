@@ -1,6 +1,8 @@
+/* HelloOS */
+
 #include <misc/string.h>
 
-// Добавить к строке строку
+// add string ot string
 int strcat_i;
 void strcat(char* s, const char* t){
     strcat_i = 0;
@@ -12,7 +14,7 @@ void strcat(char* s, const char* t){
     s[strcat_i] = '\0';
 }
 
-// Получить длину строки
+// get string len
 int strlen(char* str){
     int i = 0;
     while(str[i] == '\0'){ i++; }
@@ -20,7 +22,7 @@ int strlen(char* str){
     return i;
 }
 
-// Сравнить строки
+// compare strings
 int strcmp(const char * str1, const char * str2) {
     int diff;
     while (*str1 != 0 && *str2 != 0) {
@@ -33,10 +35,10 @@ int strcmp(const char * str1, const char * str2) {
         str2++;
     }
 
-    // один из этих пунктов == 0
     return *str1 - *str2;
 }
-// Развернуть строку
+
+// reverse string
 void reverse(char s[]){
     int i, j;
     char c;
@@ -48,22 +50,24 @@ void reverse(char s[]){
     }
 }
 
+// int to string
 char* itoa(int n){
     char* s = (char*) malloc(sizeof(char) * 32);
     int i, sign;
 
-    if ((sign = n) < 0)  /* записываем знак */
-        n = -n;          /* делаем n положительным числом */
+    if ((sign = n) < 0)
+        n = -n;
     i = 0;
-    do {       /* генерируем цифры в обратном порядке */
-        s[i++] = n % 10 + '0';   /* берем следующую цифру */
-    } while ((n /= 10) > 0);     /* удаляем */
+    do {
+        s[i++] = n % 10 + '0';
+    } while ((n /= 10) > 0);
     if (sign < 0)
         s[i++] = '-';
     s[i] = '\0';
     reverse(s);
 }
 
+// memset
 void* memset(void* ptr, int value, unsigned int num) {
    unsigned char* ptr_byte = (unsigned char*)ptr;
 

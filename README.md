@@ -1,18 +1,18 @@
 ## helloos
 
-## Сборка
+## Building
 ```bash
-# выполнять только раз
+# run to configure
 apt install qemu-system-x86 gcc-multilib nasm
 git clone https://github.com/kotleni/helloos
 cd helloos
 make init
 
-# выполнять для каждой последующей сборки
+# run to build
 make
 ```
 
-## Запуск
+## Running
 ```bash
 qemu-system-x86_64 -kernel build/kernel
 ```
