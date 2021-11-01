@@ -1,6 +1,6 @@
 all:
 	make -C kernel/
-	make -C bootloader/
+	#make -C bootloader/
 
 init:
 	mkdir build
