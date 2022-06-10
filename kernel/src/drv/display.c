@@ -1,8 +1,13 @@
 /* HelloOS */
 
 #include <drv/display.h>
+#include <misc/ports.h>
 
 Display* display;
+
+Display* get_display() {
+    return display;
+}
 
 void display_init() {
     display = malloc(sizeof(Display*));
@@ -11,6 +16,9 @@ void display_init() {
     display->col = 0;
     display->attr = WHITE;
     display->vidptr = (char*)0xb8000;
+
+    display_clear();
+    disable_cursor();
 }
 
 void display_clear() {
@@ -33,10 +41,30 @@ void display_setcur(int x, int y) {
 
     display->col = x;
     display->row = y;
+
+    unsigned short pos = y * MAX_COL + x;
+ 
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (unsigned char) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
 }
 
 void display_movecur(int dx, int dy) {
     display_setcur(display->col + dx, display->row + dy);
+}
+
+void enable_cursor(unsigned char cursor_start, unsigned char cursor_end) {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+ 
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+}
+
+void disable_cursor(){
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
 }
 
 void display_putch(char c) {

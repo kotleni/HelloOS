@@ -9,32 +9,43 @@
 
 #include <defines.h>
 
-void readInput(char* line) {
-    KeyboardKey* key;
+void shell_input(char* input) {
     int cursor = 0;
     for(;;) {
-        key = keyboard_read();
+        KeyboardKey* key = keyboard_read();
 
-        if(key->num == 28)
-        {
+        if(key->num == 28) { // is enter
             break;
-        }
-        else if(key->num == 14) {
+        } else if(key->num == 14) { // is backspace
             if(cursor == 0) { continue; }
 
-            cursor--;
-            line[cursor] = '\0';
+            cursor -= 1;
+            input[cursor] = '\0';
 
             display_movecur(-1, 0);
             display_putch('\0');
             display_movecur(-1, 0);
-        }
-        else {
-            strcat(line, key->ascii);
-            display_putch(line[cursor]);
+        } else { // other char
+            strcat(input, key->ascii);
+            display_putch(input[cursor]);
+            //display_movecur(1, 0);
 
-            cursor++;
+            cursor += 1;
         }
+    }
+}
+
+void start_shell() {
+    char* input = malloc(sizeof(char*) * 64);
+    for(;;) {
+        memset(input, 0x00, sizeof(char*) * 64); // clear input data
+
+        display_puts((char*) shell);
+        // display_setcur(sizeof(shell) + 1, get_display()->col);
+        shell_input(input);                      // read input
+
+        display_puts("\nUnknown command ");
+        display_puts(input);
     }
 }
 
@@ -43,21 +54,8 @@ void kmain() {
     keyboard_init();
     display_init();
 
-    // title
-    display_clear();
-    display_puts((char*) motd);
-    display_puts("\nVersion: "); display_puts((char*) version); display_puts("\n");
-    display_puts("Malloc: "); display_puts(itoa(getRamSize() / 1024)); display_puts(" MB\n");
+    start_shell();
 
     // loop
-    char* line = malloc(sizeof(char*) * 64);
-    for(;;) {
-        memset(line, 0x00, sizeof(char*) * 64);
-
-        display_puts((char*) shell);
-        readInput(line);
-
-        display_puts("\nUnknown command ");
-        display_puts(line);
-    }
+    for(;;) {}
 }

@@ -31,6 +31,8 @@ typedef struct {
     char *vidptr;
 } Display;
 
+Display* get_display();
+
 void display_init();
 
 void display_clear();

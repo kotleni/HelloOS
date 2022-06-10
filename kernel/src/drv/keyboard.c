@@ -11,7 +11,7 @@ const char *sc_ascii[] = { "?", "?", "1", "2", "3", "4", "5", "6",
 
 KeyboardKey* k;
 
-// wait keypress without
+// wait keypress unsafe
 KeyboardKey* keyboard_read_unsafe() {
     while(!(port_byte_in(0x64) & 0x01)){
         port_byte_out(0x20 , 0x20);
