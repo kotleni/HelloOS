@@ -8,6 +8,7 @@
 #include <drv/keyboard.h>
 
 #include <defines.h>
+#include <commit.h>
 
 void shell_input(char* input) {
     int cursor = 0;
@@ -53,6 +54,15 @@ void kmain() {
     // init
     keyboard_init();
     display_init();
+
+    display_puts(motd);
+    display_puts(" ");
+    display_puts(version);
+    display_putch('\n');
+
+    display_puts("Commit: ");
+    display_puts(COMMIT);
+    display_putch('\n');
 
     start_shell();
 
