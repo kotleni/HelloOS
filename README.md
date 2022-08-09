@@ -1,5 +1,3 @@
-❗️This project was just a toy, and I got tired of it. Therefore, I transfer it to the archived status.
-
 ## helloos
 Simple home made OS for x86.
 
