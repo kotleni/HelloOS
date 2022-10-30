@@ -21,13 +21,3 @@ unsigned short port_word_in(unsigned short port) {
 void port_word_out(unsigned short port, unsigned short data) {
 	__asm__("out %%ax, %%dx": :"a" (data), "d" (port));
 }
-
-// aliases
-
-void outb(unsigned short port, unsigned char data) {
-	port_byte_out(port, data);
-}
-
-unsigned char inb(unsigned short port) {
-	return port_byte_in(port);
-}

@@ -41,6 +41,8 @@ void display_setcur(int x, int y);
 
 void display_movecur(int dx, int dy);
 
+void disable_cursor();
+
 void display_putch(char c);
 
 void display_puts(char* str);

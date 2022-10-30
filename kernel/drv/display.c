@@ -62,7 +62,7 @@ void enable_cursor(unsigned char cursor_start, unsigned char cursor_end) {
 	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
 }
 
-void disable_cursor(){
+void disable_cursor() {
 	outb(0x3D4, 0x0A);
 	outb(0x3D5, 0x20);
 }
