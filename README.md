@@ -18,6 +18,21 @@ make
 qemu-system-x86_64 -kernel build/kernel
 ```
 
+Fedora:
+```bash
+# run to prepare
+dnf install qemu glibc-devel nasm
+git clone https://github.com/kotleni/helloos
+cd helloos
+make init
+
+# run to build
+make
+
+# run to test
+qemu-system-x86_64 -kernel build/kernel
+```
+
 MacOS:
 ```bash
 # run to prepare
