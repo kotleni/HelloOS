@@ -1,51 +1,29 @@
 ## helloos
 Simple home made OS for x86.
 
-## Building
+## Dependecies
 
 Ubuntu:
 ```bash
-# run to prepare
 apt install qemu-system-x86 gcc-multilib nasm
-git clone https://github.com/kotleni/helloos
-cd helloos
-make init
-
-# run to build
-make
-
-# run to test
-qemu-system-x86_64 -kernel build/kernel
 ```
 
 Fedora:
 ```bash
-# run to prepare
 dnf install qemu glibc-devel nasm
-git clone https://github.com/kotleni/helloos
-cd helloos
-make init
-
-# run to build
-make
-
-# run to test
-qemu-system-x86_64 -kernel build/kernel
 ```
 
 MacOS:
 ```bash
-# run to prepare
-brew install x86_64-elf-gcc
-brew install nasm
-brew install qemu-system-x86
+brew install x86_64-elf-gcc nasm qemu-system-x86
+```
+
+### Build
 git clone https://github.com/kotleni/helloos
 cd helloos
-
-# run to build
 mkdir build
+
 make
 
-# run to test
-qemu-system-x86_64 -kernel build/kernel
-```
+### Run on qemu
+qemu-system-x86_64 -drive file=build/floppy.img,index=0,if=ide,format=raw -kernel build/kernel
