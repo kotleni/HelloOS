@@ -50,6 +50,12 @@ void start_shell() {
     }
 }
 
+void panic(const char* message) {
+    display_puts("\n========[PANIC]========\n");
+    display_puts(message);
+    display_puts("\n=======================\n");
+}
+
 void kmain() {
     // init
     keyboard_init();
@@ -60,7 +66,15 @@ void kmain() {
     display_puts(version);
     display_putch('\n');
 
-    ata_identify();
+    uint8_t identity = ata_identify();
+
+    if(identity == 0) {
+        panic("Can't identify ATA!");
+        for(;;) {}
+    }
+
+    uint8_t* buff = malloc(sizeof(uint8_t) * 32);
+    ata_pio_read28(0, 1, buff);
 
     start_shell();
 
