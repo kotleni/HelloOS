@@ -4,6 +4,9 @@
 #include <misc/string.h>
 #include <misc/memory.h>
 
+#define FAT_ERROR_NOT_A_DIR -1
+#define FAT_ERROR_FILE_NOT_FOUND -2
+
 #pragma pack(push, 1)
 
 typedef struct 

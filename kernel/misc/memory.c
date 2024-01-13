@@ -5,26 +5,16 @@ void * memcpy(void * restrict dest, const void * restrict src, size_t count) {
 	return dest;
 }
 
-int memcmp(const void *s1, const void *s2, int len)
+int memcmp(const void * s1, const void * s2, size_t n)
 {
-    unsigned char *p = s1;
-    unsigned char *q = s2;
-    int charCompareStatus = 0;
-    //If both pointer pointing same memory block
-    if (s1 == s2)
-    {
-        return charCompareStatus;
+    unsigned char u1, u2;
+
+    for ( ; n-- ; s1++, s2++) {
+	u1 = * (unsigned char *) s1;
+	u2 = * (unsigned char *) s2;
+	if ( u1 != u2) {
+	    return (u1-u2);
+	}
     }
-    while (len > 0)
-    {
-        if (*p != *q)
-        {  //compare the mismatching character
-            charCompareStatus = (*p >*q)?1:-1;
-            break;
-        }
-        len--;
-        p++;
-        q++;
-    }
-    return charCompareStatus;
+    return 0;
 }

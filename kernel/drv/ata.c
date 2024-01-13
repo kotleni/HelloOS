@@ -68,7 +68,7 @@ uint8_t ata_identify() {
     return 1;
 }
 
-void ata_pio_read28(uint32_t LBA, uint8_t sectorcount, uint8_t *target) {
+bool ata_pio_read28(uint32_t LBA, uint8_t sectorcount, uint8_t *target) {
     // HARD CODE MASTER (for now)
     outb(ATA_PRIMARY_DRIVE_HEAD, 0xE0 | ((LBA >> 24) & 0x0F));
     outb(ATA_PRIMARY_ERR, 0x00);
@@ -86,15 +86,19 @@ void ata_pio_read28(uint32_t LBA, uint8_t sectorcount, uint8_t *target) {
             if(status & STAT_DRQ) {
                 // Drive is ready to transfer data!
                 break;
+            } else if(status & STAT_ERR) {
+                return false;
             }
-        }
+        } 
         // Transfer the data!
         insw(ATA_PRIMARY_DATA, (void *)target, 256);
         target += 256;
     }
+
+    return true;
 }
 
-void ata_pio_read48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
+bool ata_pio_read48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
     // HARD CODE MASTER (for now)
     outb(ATA_PRIMARY_DRIVE_HEAD, 0x40);                     // Select master
     outb(ATA_PRIMARY_SECCOUNT, (sectorcount >> 8) & 0xFF ); // sectorcount high
@@ -116,16 +120,18 @@ void ata_pio_read48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
             if(status & STAT_DRQ) {
                 // Drive is ready to transfer data!
                 break;
+            } else if(status & STAT_ERR) {
+                return false;
             }
         }
         // Transfer the data!
         insw(ATA_PRIMARY_DATA, (void *)target, 256);
         target += 256;
     }
-
+    return true;
 }
 
-void ata_pio_write48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
+bool ata_pio_write48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
 
     // HARD CODE MASTER (for now)
     outb(ATA_PRIMARY_DRIVE_HEAD, 0x40);                     // Select master
@@ -147,10 +153,8 @@ void ata_pio_write48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
             if(status & STAT_DRQ) {
                 // Drive is ready to transfer data!
                 break;
-            }
-            else if(status & STAT_ERR) {
-                for(;;){} // TODO: IMPL KERNEL PANIC
-                //PANIC("DISK SET ERROR STATUS!");
+            } else if(status & STAT_ERR) {
+                return false;
             }
         }
         // Transfer the data!
@@ -162,4 +166,6 @@ void ata_pio_write48(uint64_t LBA, uint16_t sectorcount, uint8_t *target) {
     outb(ATA_PRIMARY_COMM_REGSTAT, 0xE7);
     // Poll for BSY.
     while(inb(ATA_PRIMARY_COMM_REGSTAT) & STAT_BSY) {}
+    
+    return true;
 }

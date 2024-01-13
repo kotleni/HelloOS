@@ -1,6 +1,7 @@
 TMP_DIR := /tmp
 BLD_DIR := build/
 INC_DIR := include/
+BASE_FS := basefs/
 
 GCC_BIN := x86_64-elf-gcc
 GCC_BIN_FEDORA := gcc
@@ -11,6 +12,12 @@ GCC_ARGS := -m32 -I$(INC_DIR) -ffreestanding
 
 all:
 	echo NON-FEDORA COMPILING IS BROKEN!
+
+floppy:
+	dd if=/dev/zero of=$(BLD_DIR)/floppy.img bs=512 count=2880
+	mkfs.fat -F 12 -n "DRIVE" $(BLD_DIR)/floppy.img
+	mmd -i $(BLD_DIR)/floppy.img "::etc"
+	mcopy -i $(BLD_DIR)/floppy.img $(BASE_FS)/motd.txt "::etc/motd.txt"
 
 fedora:
 	nasm -f elf32 boot/boot.asm -o $(TMP_DIR)/boot.o

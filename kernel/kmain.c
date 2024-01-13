@@ -106,6 +106,8 @@ void start_shell() {
             } else {
                 panic("Not implemented yet!");
             }
+
+            FAT_Close(fd);
         } else {
             display_puts("\nUnknown command ");
             display_puts(cmd);
@@ -126,11 +128,6 @@ void kmain() {
     keyboard_init();
     display_init();
 
-    display_puts(motd);
-    display_puts(" ");
-    display_puts(version);
-    display_putch('\n');
-
     uint8_t identity = FAT_IdentifyAta();
 
     if(identity == 0) {
@@ -141,6 +138,27 @@ void kmain() {
     {
         panic("FAT init error");
     }
+
+    // Show motd from file
+    FAT_File *fd = FAT_Open("/etc/motd.txt");
+    if(fd == FAT_ERROR_NOT_A_DIR) {
+        panic("FAT_ERROR_NOT_A_DIR");
+    } else if(fd == FAT_ERROR_FILE_NOT_FOUND) {
+        panic("FAT_ERROR_FILE_NOT_FOUND");
+    }
+    //uint32_t read = 0;
+    //char buffer[100];
+    // while ((read = FAT_Read(fd, sizeof(buffer), buffer)))
+    // {
+    //     for (uint32_t i = 0; i < read; i++)
+    //         display_putch(buffer[i]);
+    // }
+    //FAT_Close(fd);
+
+    //display_puts(motd);
+    //display_puts("\,");
+    //display_puts(version);
+    display_putch('\n');
 
     start_shell();
 
