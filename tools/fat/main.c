@@ -25,7 +25,7 @@ int main(int argc, const char** argv)
     }
 
     // browse files in root
-    FAT_File far* fd = FAT_Open(&disk, argv[2]);
+    FAT_File *fd = FAT_Open(&disk, argv[2]);
 
     if (fd->IsDirectory)
     {

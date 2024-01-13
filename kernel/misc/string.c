@@ -74,3 +74,44 @@ void* memset(void* ptr, int value, unsigned int num) {
    for (unsigned int i = 0; i < num; ptr_byte[i] = (unsigned char)value, i++);
    return ptr;
 }
+
+char *strchr(const char *p, int ch)
+{
+	char c;
+
+	c = ch;
+	for (;; ++p) {
+		if (*p == c)
+			return ((char *)p);
+		if (*p == '\0')
+			return (NULL);
+	}
+	// NOTREACHED
+}
+
+char* toupper(char* string)
+{
+    for(char* p=string; *p != '\0'; p++)
+    {
+        if(*p >= 'a' && *p <= 'z') 
+          *p -= 32;
+    }
+    return string;
+}
+
+int isspace(int c)
+{
+	return (c == '\t' || c == '\n' ||
+	    c == '\v' || c == '\f' || c == '\r' || c == ' ' ? 1 : 0);
+}
+
+char *trim(char *s) {
+    char *ptr;
+    if (!s)
+        return NULL;   // handle NULL string
+    if (!*s)
+        return s;      // handle empty string
+    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
+    ptr[1] = '\0';
+    return s;
+}

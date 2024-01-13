@@ -9,3 +9,7 @@ int strcmp(const char * str1, const char * str2);
 void reverse(char s[]);
 char* itoa(int n);
 void* memset(void* ptr, int value, unsigned int num);
+char *strchr(const char *p, int ch);
+char* toupper(char* string);
+int isspace(int c);
+char *trim(char *s);

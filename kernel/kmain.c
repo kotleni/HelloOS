@@ -6,7 +6,8 @@
 
 #include <drv/display.h>
 #include <drv/keyboard.h>
-#include <drv/ata.h>
+
+#include <fs/fat.h>
 
 #include <defines.h>
 
@@ -36,6 +37,44 @@ void shell_input(char* input) {
     }
 }
 
+#define MAX_ARGS 10
+#define MAX_ARG_LENGTH 50
+
+void parse_args(const char *argsString, int *argc, char *argv[]) {
+    *argc = 0;
+
+    // Iterate through the string
+    for (int i = 0; argsString[i] != '\0';) {
+        // Skip leading spaces
+        while (argsString[i] == ' ') {
+            ++i;
+        }
+
+        // Check for the end of the string
+        if (argsString[i] == '\0') {
+            break;
+        }
+
+        // Find the end of the current argument
+        int start = i;
+        while (argsString[i] != ' ' && argsString[i] != '\0') {
+            ++i;
+        }
+        int end = i;
+
+        // Allocate memory for the argument and copy the substring
+        argv[*argc] = malloc(end - start + 1);
+        for (int j = start; j < end; ++j) {
+            argv[*argc][j - start] = argsString[j];
+        }
+        argv[*argc][end - start] = '\0';
+        ++(*argc);
+    }
+}
+
+char* args[];
+int argc;
+
 void start_shell() {
     char* input = malloc(sizeof(char*) * 64);
     for(;;) {
@@ -43,10 +82,34 @@ void start_shell() {
 
         display_puts((char*) shell);
         // display_setcur(sizeof(shell) + 1, get_display()->col);
-        shell_input(input);                      // read input
+        shell_input(input);                      // read input\
 
-        display_puts("\nUnknown command ");
-        display_puts(input);
+        parse_args(input, &argc, args);
+        char* cmd = trim(args[0]);
+
+        if(strcmp(cmd, "ls") == 0) { 
+            char* path = trim(args[1]);
+            FAT_File *fd = FAT_Open(path);
+
+            if (fd->IsDirectory)
+            {
+                FAT_DirectoryEntry entry;
+                int i = 0;
+                display_putch('\n');
+                while (FAT_ReadEntry(fd, &entry) && i++ < 10)
+                {
+                    display_puts("  ");
+                    for (int i = 0; i < 11; i++)
+                        display_putch(entry.Name[i]);
+                    display_puts("\n");
+                }
+            } else {
+                panic("Not implemented yet!");
+            }
+        } else {
+            display_puts("\nUnknown command ");
+            display_puts(cmd);
+        }
     }
 }
 
@@ -54,6 +117,8 @@ void panic(const char* message) {
     display_puts("\n========[PANIC]========\n");
     display_puts(message);
     display_puts("\n=======================\n");
+
+    for(;;) {}
 }
 
 void kmain() {
@@ -66,15 +131,16 @@ void kmain() {
     display_puts(version);
     display_putch('\n');
 
-    uint8_t identity = ata_identify();
+    uint8_t identity = FAT_IdentifyAta();
 
     if(identity == 0) {
         panic("Can't identify ATA!");
-        for(;;) {}
     }
 
-    uint8_t* buff = malloc(sizeof(uint8_t) * 32);
-    ata_pio_read28(0, 1, buff);
+    if (!FAT_Initialize())
+    {
+        panic("FAT init error");
+    }
 
     start_shell();
 

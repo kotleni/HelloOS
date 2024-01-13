@@ -20,3 +20,10 @@ typedef unsigned long long uint64_t;
 #define CHAR_BIT 8
 #define INT32_MAX 0x7fffffffL
 #define UINT32_MAX 0xffffffffL
+
+// bool
+#ifndef bool
+#define bool uint8_t
+#define true 1
+#define false 0
+#endif
