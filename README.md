@@ -24,6 +24,7 @@ git clone https://github.com/kotleni/helloos
 cd helloos
 mkdir build
 
+make floppy
 make
 ```
 
