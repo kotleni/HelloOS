@@ -175,7 +175,6 @@ FAT_File *FAT_OpenEntry(FAT_DirectoryEntry* entry)
     fd->CurrentCluster = fd->FirstCluster;
     fd->CurrentSectorInCluster = 0;
 
-    // TODO: check is readed
     if (ata_pio_read48(FAT_ClusterToLba(fd->CurrentCluster), 1, fd->Buffer) == false)
     {
         //TODO: printf("FAT: read error\r\n");
@@ -259,7 +258,7 @@ uint32_t FAT_Read(FAT_File *file, uint32_t byteCount, void* dataOut)
             }
         }
     }
-
+    
     return u8DataOut - (uint8_t*)dataOut;
 }
 
