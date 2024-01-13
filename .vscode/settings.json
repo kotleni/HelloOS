@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "stdbool.h": "c",
+        "cstdlib": "cpp",
+        "functional": "c",
+        "cstdint": "c",
+        "compare": "c",
+        "ata.h": "c",
+        "string.h": "c",
+        "memory.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
