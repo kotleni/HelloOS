@@ -7,7 +7,8 @@
         "compare": "c",
         "ata.h": "c",
         "string.h": "c",
-        "memory.h": "c"
+        "memory.h": "c",
+        "typeinfo": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
