@@ -6,6 +6,7 @@
 
 #include <drv/display.h>
 #include <drv/keyboard.h>
+#include <drv/ata.h>
 
 #include <defines.h>
 
@@ -58,6 +59,8 @@ void kmain() {
     display_puts(" ");
     display_puts(version);
     display_putch('\n');
+
+    ata_identify();
 
     start_shell();
 
