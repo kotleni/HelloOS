@@ -8,7 +8,9 @@
         "ata.h": "c",
         "string.h": "c",
         "memory.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "malloc.h": "c",
+        "kernel.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

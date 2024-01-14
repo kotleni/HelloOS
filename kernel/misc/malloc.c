@@ -118,6 +118,10 @@ void free(void * ptr){
     return;
 }
 
+void myFree(void *fre) {
+    // TODO
+}
+
 int getRamSize() {
    return MAX;
 }
