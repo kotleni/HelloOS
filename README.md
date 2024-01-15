@@ -1,8 +1,15 @@
 ## helloos
 Simple home made OS for x86.
 
-## Dependecies
+### Whats working?
+- [x] Memory allocator
+- [x] Multiboot loader support
+- [x] Text mode video driver
+- [x] ATA driver
+- [x] Keyboard driver
+- [ ] Serial driver
 
+### Dependecies
 Ubuntu:
 ```bash
 apt install qemu-system-x86 gcc-multilib nasm
@@ -30,5 +37,6 @@ make
 
 ### Run on qemu
 ```bash
-qemu-system-x86_64 -drive file=build/floppy.img,index=0,if=ide,format=raw -kernel build/kernel
+qemu-system-x86_64 -m 512 -drive file=build/floppy.img,index=0,if=ide,format=raw -kernel build/kernel
 ```
+<i>** Floppy driver using as root fs drive.</i>
