@@ -8,6 +8,7 @@ Simple home made OS for x86.
 - [x] ATA driver
 - [x] Keyboard driver
 - [ ] Serial driver
+- [ ] FAT32 filesystem
 
 ### Dependecies
 Ubuntu:
