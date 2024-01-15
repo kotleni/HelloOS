@@ -1,3 +1,5 @@
+%define STACK_SIZE 0x4000
+
 bits 32
 section .text
         ; multiboot spec
@@ -10,11 +12,21 @@ global start
 extern kmain
 
 start:
+  ; disable interrupts
   cli
+
+  ; set stack 
   mov esp, stack_space
-  call kmain ; call function from c
+  ;add esp, STACK_SIZE
+
+  ; push magic and multiboot_info_t addr
+  push ebx
+  push eax
+
+  ; call function from c
+  call kmain
   hlt
 
 section .bss
-resb 8192
+resb STACK_SIZE
 stack_space:

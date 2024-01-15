@@ -1,51 +1,43 @@
 ## helloos
 Simple home made OS for x86.
 
-## Building
+### Whats working?
+- [x] Memory allocator
+- [x] Multiboot loader support
+- [x] Text mode video driver
+- [x] ATA driver
+- [x] Keyboard driver
+- [ ] Serial driver
+- [x] FAT32 filesystem
 
+### Dependecies
 Ubuntu:
 ```bash
-# run to prepare
 apt install qemu-system-x86 gcc-multilib nasm
-git clone https://github.com/kotleni/helloos
-cd helloos
-make init
-
-# run to build
-make
-
-# run to test
-qemu-system-x86_64 -kernel build/kernel
 ```
 
 Fedora:
 ```bash
-# run to prepare
 dnf install qemu glibc-devel nasm
-git clone https://github.com/kotleni/helloos
-cd helloos
-make init
-
-# run to build
-make
-
-# run to test
-qemu-system-x86_64 -kernel build/kernel
 ```
 
 MacOS:
 ```bash
-# run to prepare
-brew install x86_64-elf-gcc
-brew install nasm
-brew install qemu-system-x86
+brew install x86_64-elf-gcc nasm qemu-system-x86
+```
+
+### Build
+```bash
 git clone https://github.com/kotleni/helloos
 cd helloos
-
-# run to build
 mkdir build
-make
 
-# run to test
-qemu-system-x86_64 -kernel build/kernel
+make floppy
+make
 ```
+
+### Run on qemu
+```bash
+qemu-system-x86_64 -m 512 -drive file=build/floppy.img,index=0,if=ide,format=raw -kernel build/kernel
+```
+<i>** Floppy driver using as root fs drive.</i>

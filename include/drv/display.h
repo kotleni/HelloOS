@@ -3,6 +3,8 @@
 #pragma once
 
 #include <misc/malloc.h>
+#include <misc/ports.h>
+#include <kernel.h>
 
 #define MAX_ROW 25
 #define MAX_COL 80

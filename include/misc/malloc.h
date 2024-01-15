@@ -2,16 +2,20 @@
 
 #pragma once
 
-#define MAX 25000
-#define NULL 0
+#include <types.h>
+#include <misc/memory.h>
+#include <kernel.h>
 
-void* malloc(int size);
-void myFree(void *fre);
-int getRamSize();
+#define STATIC_ALLOC_SIZE 1024*1024*1024 // 256mb
+#define MAX_MEM_NODES_COUNT 64
 
-struct node{
-    int size;
-    int status; // o if null
-    struct node * next;
-    //struct node * prev;
-};
+typedef struct {
+    void* ptr;
+    size_t size;
+    bool is_free;
+} mem_node;
+
+void mm_init(uint32_t malloc_start_ptr);
+void* malloc(size_t size);
+void* realloc(void* oldptr, size_t size);
+void free(void *fre);

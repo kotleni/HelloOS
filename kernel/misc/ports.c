@@ -21,3 +21,11 @@ unsigned short port_word_in(unsigned short port) {
 void port_word_out(unsigned short port, unsigned short data) {
 	__asm__("out %%ax, %%dx": :"a" (data), "d" (port));
 }
+
+void inportsm(unsigned short port, unsigned char * data, unsigned long size) {
+	asm volatile ("rep insw" : "+D" (data), "+c" (size) : "d" (port) : "memory");
+}
+
+void outportsm(unsigned short port, unsigned char * data, unsigned long size) {
+	asm volatile ("rep outsw" : "+S" (data), "+c" (size) : "d" (port));
+}
