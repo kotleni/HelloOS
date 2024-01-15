@@ -1,7 +1,7 @@
 ## helloos
 Simple home made OS for x86.
 
-<img src="https://github.com/kotleni/HelloOS/assets/38311102/dcfb5f74-3182-4dfe-996d-967ecda52471" width=370>
+<img src="https://github.com/kotleni/HelloOS/assets/38311102/dcfb5f74-3182-4dfe-996d-967ecda52471" width=480>
 
 ### Whats working?
 - [x] Memory allocator
