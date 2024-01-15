@@ -13,3 +13,4 @@ char *strchr(const char *p, int ch);
 char* toupper(char* string);
 int isspace(int c);
 char *trim(char *s);
+void parse_args(const char *argsString, int *argc, char *argv[]);

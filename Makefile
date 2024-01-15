@@ -15,7 +15,7 @@ all:
 
 floppy:
 	dd if=/dev/zero of=$(BLD_DIR)/floppy.img bs=512 count=2880
-	mkfs.fat -F 12 -n "DRIVE" $(BLD_DIR)/floppy.img
+	mkfs.fat -F 32 -n "DRIVE" $(BLD_DIR)/floppy.img
 	mmd -i $(BLD_DIR)/floppy.img "::etc"
 	mcopy -i $(BLD_DIR)/floppy.img $(BASE_FS)/motd.txt "::etc/motd.txt"
 
@@ -30,4 +30,5 @@ fedora:
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/string.o -c kernel/misc/string.c
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/memory.o -c kernel/misc/memory.c
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/fat.o -c kernel/fs/fat.c
-	$(LD_BIN_FEDORA) -m elf_i386 -T link.ld -o $(BLD_DIR)/kernel $(TMP_DIR)/boot.o $(TMP_DIR)/kmain.o $(TMP_DIR)/display.o $(TMP_DIR)/keyboard.o $(TMP_DIR)/ata.o $(TMP_DIR)/ports.o $(TMP_DIR)/malloc.o $(TMP_DIR)/string.o $(TMP_DIR)/memory.o $(TMP_DIR)/fat.o
+	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/kernel.o -c kernel/kernel.c
+	$(LD_BIN_FEDORA) -m elf_i386 -T link.ld -o $(BLD_DIR)/kernel $(TMP_DIR)/boot.o $(TMP_DIR)/kmain.o $(TMP_DIR)/display.o $(TMP_DIR)/keyboard.o $(TMP_DIR)/ata.o $(TMP_DIR)/ports.o $(TMP_DIR)/malloc.o $(TMP_DIR)/string.o $(TMP_DIR)/memory.o $(TMP_DIR)/fat.o $(TMP_DIR)/kernel.o

@@ -115,3 +115,35 @@ char *trim(char *s) {
     ptr[1] = '\0';
     return s;
 }
+
+void parse_args(const char *argsString, int *argc, char *argv[]) {
+    *argc = 0;
+
+    // Iterate through the string
+    for (int i = 0; argsString[i] != '\0';) {
+        // Skip leading spaces
+        while (argsString[i] == ' ') {
+            ++i;
+        }
+
+        // Check for the end of the string
+        if (argsString[i] == '\0') {
+            break;
+        }
+
+        // Find the end of the current argument
+        int start = i;
+        while (argsString[i] != ' ' && argsString[i] != '\0') {
+            ++i;
+        }
+        int end = i;
+
+        // Allocate memory for the argument and copy the substring
+        argv[*argc] = malloc(end - start + 1);
+        for (int j = start; j < end; ++j) {
+            argv[*argc][j - start] = argsString[j];
+        }
+        argv[*argc][end - start] = '\0';
+        ++(*argc);
+    }
+}

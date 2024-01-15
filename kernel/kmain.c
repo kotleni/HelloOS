@@ -12,108 +12,103 @@
 #include <va_list.h>
 #include <defines.h>
 
-void shell_input(char* input) {
-    int cursor = 0;
-    for(;;) {
-        KeyboardKey* key = keyboard_read();
+#define KEY_ENTER 28
+#define KEY_BACKSPACE 14
 
-        if(key->num == 28) { // is enter
-            break;
-        } else if(key->num == 14) { // is backspace
-            if(cursor == 0) { continue; }
+void read_line(char* input) {
+	int cursor = 0;
+	KeyboardKey* key;
+	for(;;) {
+		key = keyboard_read();
 
-            cursor -= 1;
-            input[cursor] = '\0';
+		switch(key->num) {
+			case KEY_ENTER:
+				return;
+			case KEY_BACKSPACE:
+				if(cursor == 0) continue;
 
-            display_movecur(-1, 0);
-            display_putch('\0');
-            display_movecur(-1, 0);
-        } else { // other char
-            strcat(input, key->ascii);
-            display_putch(input[cursor]);
-            //display_movecur(1, 0);
+            	cursor -= 1;
+            	input[cursor] = '\0';
 
-            cursor += 1;
-        }
-    }
+            	display_movecur(-1, 0);
+            	display_putch('\0');
+            	display_movecur(-1, 0);
+				break;
+			default:
+				char str[2];
+				str[0] = key->ascii;
+				str[1] = '\0';
+				strcat(input, str);
+            	display_putch(key->ascii);
+
+            	cursor += 1;
+				break;
+		}
+	}
 }
 
-#define MAX_ARGS 10
-#define MAX_ARG_LENGTH 50
-
-void parse_args(const char *argsString, int *argc, char *argv[]) {
-    *argc = 0;
-
-    // Iterate through the string
-    for (int i = 0; argsString[i] != '\0';) {
-        // Skip leading spaces
-        while (argsString[i] == ' ') {
-            ++i;
-        }
-
-        // Check for the end of the string
-        if (argsString[i] == '\0') {
-            break;
-        }
-
-        // Find the end of the current argument
-        int start = i;
-        while (argsString[i] != ' ' && argsString[i] != '\0') {
-            ++i;
-        }
-        int end = i;
-
-        // Allocate memory for the argument and copy the substring
-        argv[*argc] = malloc(end - start + 1);
-        for (int j = start; j < end; ++j) {
-            argv[*argc][j - start] = argsString[j];
-        }
-        argv[*argc][end - start] = '\0';
-        ++(*argc);
-    }
+#define PORT 0x3f8          // COM1
+ 
+static int init_serial() {
+   outb(PORT + 1, 0x00);    // Disable all interrupts
+   outb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
+   outb(PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
+   outb(PORT + 1, 0x00);    //                  (hi byte)
+   outb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
+   outb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
+   outb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+   outb(PORT + 4, 0x1E);    // Set in loopback mode, test the serial chip
+   outb(PORT + 0, 0xAE);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
+ 
+   // Check if serial is faulty (i.e: not same byte as sent)
+   if(inb(PORT + 0) != 0xAE) {
+      return 1;
+   }
+ 
+   // If serial is not faulty set it in normal operation mode
+   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
+   outb(PORT + 4, 0x0F);
+   return 0;
 }
 
-char* args[];
-int argc;
+int is_transmit_empty() {
+   return inb(PORT + 5) & 0x20;
+}
+ 
+void write_serial(char a) {
+   while (is_transmit_empty() == 0);
+ 
+   outb(PORT,a);
+}
 
-void start_shell() {
-    char* input = malloc(sizeof(char*) * 64);
-    for(;;) {
-        memset(input, 0x00, sizeof(char*) * 64); // clear input data
+void new_shell() {
+	char* input = malloc(sizeof(char) * 64);
 
-        display_puts((char*) shell);
-        // display_setcur(sizeof(shell) + 1, get_display()->col);
-        shell_input(input);                      // read input\
+	char abc[32];
+	
+	for(;;) {
+		// Show shell prefix
+		display_puts((char*) shell);
 
-        parse_args(input, &argc, args);
+		// Clear input string
+		memset(input, 0x00, sizeof(char) * 64);
+
+		// Read line from input
+		read_line(input);
+		display_putch('\n');
+
+		// Parse arguments
+		char** args;
+		int argc;
+		parse_args(input, &argc, args);
         char* cmd = trim(args[0]);
 
-        if(strcmp(cmd, "ls") == 0) { 
-            // char* path = trim(args[1]);
-            // FAT_File *fd = FAT_Open(path);
+		if(strcmp(cmd, "info") == 0) {
 
-            // if (fd->IsDirectory)
-            // {
-            //     FAT_DirectoryEntry entry;
-            //     int i = 0;
-            //     display_putch('\n');
-            //     while (FAT_ReadEntry(fd, &entry) && i++ < 10)
-            //     {
-            //         display_puts("  ");
-            //         for (int i = 0; i < 11; i++)
-            //             display_putch(entry.Name[i]);
-            //         display_puts("\n");
-            //     }
-            // } else {
-            //     panic("Not implemented yet!");
-            // }
-
-            // FAT_Close(fd);
-        } else {
-            display_puts("\nUnknown command ");
-            display_puts(cmd);
-        }
-    }
+		} else {
+			kern->printf("Unknown command %s!\n", args[0]);
+		}
+	}
 }
 
 /*
@@ -170,9 +165,10 @@ static void print_hex(unsigned int value, unsigned int width, char * buf, int * 
 
 	i = (int)n_width;
 	while (i-- > 0) {
-		buf[*ptr] = "0123456789abcdef"[(value>>(i*4))&0xF];
-		*ptr += + 1;
+		buf[*ptr + i] = "0123456789abcdef"[value & 0xF];
+		value >>= 4;
 	}
+	*ptr += n_width;
 }
 
 /*
@@ -245,8 +241,10 @@ kprintf(
 	int out = vasprintf(buf, fmt, args);
 	/* We're done with our arguments */
 	va_end(args);
+    display_puts("[KERN] ");
     for(int i = 0; i < out; i += 1) {
         display_putch(buf[i]);
+		write_serial(buf[i]);
     }
 	return out;
 }
@@ -273,20 +271,36 @@ void kpanic(const char* message) {
 }
 
 void kernel_init() {
-    kern = (kernel*) malloc(sizeof(kernel));
     kern->printf = &kprintf;
     kern->panic = &kpanic;
 }
 
+// extern uint32_t kernel_end;
+// extern uint32_t kernel_base;
+extern uint8_t _kernel_base[];
+extern uint8_t _malloc_base[];
+
 void kmain() {
+	mm_init(0xff);
     kernel_init();
     keyboard_init();
+	init_serial();
     display_init();
+	
+	kern->printf("Kernel base addr: 0x%x\n", _kernel_base);
+	kern->printf("Kernel end addr: 0x%x\n", _malloc_base);
+	//kern->printf("Kernel end addr: %d\n", kernel_end);
+    //kern->printf("Available RAM: %dkb\n", getRamSize() / 1024);
 
-    kern->printf("value is %d\n", 32);
+    f32* master_fs = makeFilesystem("");
+    kern->printf("master_fs ptr is %d", master_fs);
+    if(master_fs == NULL) {
+        kern->panic("Failed to create fat32 filesystem. Disk may be corrupt.");
+        return;
+    }
 
-    start_shell();
+    new_shell();
 
-    // loop
-    for(;;) {}
+	// This function on should be finished
+    kern->panic("kmain is ended");
 }

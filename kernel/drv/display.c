@@ -1,36 +1,35 @@
 /* HelloOS */
 
 #include <drv/display.h>
-#include <misc/ports.h>
 
-Display* display;
+Display display;
 
 Display* get_display() {
-    return display;
+    return &display;
 }
 
 void display_init() {
-    display = malloc(sizeof(Display*));
-
-    display->row = 0;
-    display->col = 0;
-    display->attr = WHITE;
-    display->vidptr = (char*)0xb8000;
+    display.row = 0;
+    display.col = 0;
+    display.attr = WHITE;
+    display.vidptr = (char*)0xb8000;
 
     display_clear();
     disable_cursor();
+
+    kern->printf("Video initialized.\n");
 }
 
 void display_clear() {
     unsigned int j = 0;
     while(j < MAX_COL * MAX_ROW * 2) {
-        display->vidptr[j] = ' ';
-        display->vidptr[j+1] = WHITE;
+        display.vidptr[j] = ' ';
+        display.vidptr[j+1] = WHITE;
         j = j + 2;
     }
 
-    display->col = 0;
-    display->row = 0;
+    display.col = 0;
+    display.row = 0;
 }
 
 void display_setcur(int x, int y) {
@@ -39,8 +38,8 @@ void display_setcur(int x, int y) {
     if(y > MAX_ROW) { y = MAX_ROW; };
     if(y < 0) { y = 0; };
 
-    display->col = x;
-    display->row = y;
+    display.col = x;
+    display.row = y;
 
     unsigned short pos = y * MAX_COL + x;
  
@@ -51,7 +50,7 @@ void display_setcur(int x, int y) {
 }
 
 void display_movecur(int dx, int dy) {
-    display_setcur(display->col + dx, display->row + dy);
+    display_setcur(display.col + dx, display.row + dy);
 }
 
 void enable_cursor(unsigned char cursor_start, unsigned char cursor_end) {
@@ -69,25 +68,25 @@ void disable_cursor() {
 
 void display_putch(char c) {
     int skip = 0;
-    if (c == '\n' || MAX_COL <= display->col){
-        display->col = 0;
+    if (c == '\n' || MAX_COL <= display.col){
+        display.col = 0;
 
-        if (display->row < MAX_ROW){
-            display->row++;
+        if (display.row < MAX_ROW){
+            display.row++;
         }
         skip = 1;
     }
 
-    if (MAX_ROW <= display->row){
-        display->row = 0;
+    if (MAX_ROW <= display.row){
+        display.row = 0;
         display_clear();
     }
 
     if (!skip){
-        display->vidptr[(display->row * MAX_COL + display->col) * 2] = c;
-        display->vidptr[(display->row * MAX_COL + display->col) * 2 + 1] = display->attr;
-        if (display->col < MAX_COL)
-        display->col++;
+        display.vidptr[(display.row * MAX_COL + display.col) * 2] = c;
+        display.vidptr[(display.row * MAX_COL + display.col) * 2 + 1] = display.attr;
+        if (display.col < MAX_COL)
+        display.col++;
     }
 }
 
@@ -100,11 +99,11 @@ void display_puts(char* str) {
             ++j;
         }else{
             if(str[j+1] == 'w')
-                display->attr = WHITE;
+                display.attr = WHITE;
             if(str[j+1] == 'r')
-                display->attr = RED_LIGHT;
+                display.attr = RED_LIGHT;
             if(str[j+1] == 'p')
-                display->attr = PINK_LIGHT;
+                display.attr = PINK_LIGHT;
 
             ++j;
             ++j;

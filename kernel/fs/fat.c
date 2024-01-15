@@ -371,7 +371,8 @@ static void write_long_filename_entries(uint8_t *start, uint32_t num_entries, ch
 
 f32 *makeFilesystem(char *fatSystem) {
     f32 *fs = malloc(sizeof (struct f32));
-    if(!ata_identify()) {
+    kern->printf("master_fs ptr is %d", fs);
+    if(ata_identify() == 0) {
         return NULL;
     }
     kern->printf("Filesystem identified!\n");
@@ -379,12 +380,13 @@ f32 *makeFilesystem(char *fatSystem) {
 
     trim_spaces(fs->bpb.system_id, 8);
     if(strcmp(fs->bpb.system_id, "FAT32") != 0) {
-        myFree(fs);
+        kern->printf("FS is not FAT32!");
+        free(fs);
         return NULL;
     }
 
     kern->printf("Sectors per cluster: %d\n", fs->bpb.sectors_per_cluster);
-
+    
     fs->partition_begin_sector = 0;
     fs->fat_begin_sector = fs->partition_begin_sector + fs->bpb.reserved_sectors;
     fs->cluster_begin_sector = fs->fat_begin_sector + (fs->bpb.FAT_count * fs->bpb.count_sectors_per_FAT32);
@@ -410,8 +412,8 @@ f32 *makeFilesystem(char *fatSystem) {
 void destroyFilesystem(f32 *fs) {
     kern->printf("Destroying filesystem.\n");
     flushFAT(fs);
-    myFree(fs->FAT);
-    myFree(fs);
+    free(fs->FAT);
+    free(fs);
 }
 
 const struct bios_parameter_block *getBPB(f32 *fs) {
@@ -614,7 +616,7 @@ void delFile(f32 *fs, struct directory *dir, char *filename) { //struct dir_entr
                     putCluster(fs, root_cluster + fs->cluster_size, secondcluster);
                 }
                 zero_FAT_chain(fs, target_dirent.first_cluster);
-                myFree(target_dirent.name);
+                free(target_dirent.name);
                 return;
             }
             else {
@@ -624,7 +626,7 @@ void delFile(f32 *fs, struct directory *dir, char *filename) { //struct dir_entr
                     cluster = secondcluster;
                 }
             }
-            myFree(target_dirent.name);
+            free(target_dirent.name);
 
         }
         cluster = get_next_cluster_id(fs, cluster);
@@ -632,12 +634,12 @@ void delFile(f32 *fs, struct directory *dir, char *filename) { //struct dir_entr
     }
 }
 
-void myFree_directory(f32 *fs, struct directory *dir){
+void free_directory(f32 *fs, struct directory *dir){
     uint32_t i;
     for(i = 0; i < dir->num_entries; i++) {
-        myFree(dir->entries[i].name);
+        free(dir->entries[i].name);
     }
-    myFree(dir->entries);
+    free(dir->entries);
 }
 
 uint8_t *readFile(f32 *fs, struct dir_entry *dirent) {
@@ -764,10 +766,10 @@ void mkdir(f32 *fs, struct directory *dir, char *dirname) {
             struct directory newsubdir;
             populate_dir(fs, &newsubdir, subdir.entries[i].first_cluster);
             mkdir_subdirs(fs, &newsubdir, subdir.cluster);
-            myFree_directory(fs, &newsubdir);
+            free_directory(fs, &newsubdir);
         }
     }
-    myFree_directory(fs, &subdir);
+    free_directory(fs, &subdir);
 }
 
 void print_directory(f32 *fs, struct directory *dir) {
@@ -815,10 +817,10 @@ void print_directory(f32 *fs, struct directory *dir) {
         }
         kern->printf("clusters: [%d]\n", cluster_count);
     }
-    myFree(namebuff);
+    free(namebuff);
 }
 
-uint32_t count_myFree_clusters(f32 *fs) {
+uint32_t count_free_clusters(f32 *fs) {
     uint32_t clusters_in_fat = (fs->bpb.count_sectors_per_FAT32 * 512) / 4;
     uint32_t i;
     uint32_t count = 0;

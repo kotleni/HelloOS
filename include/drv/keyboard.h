@@ -10,7 +10,7 @@
 
 typedef struct {
     unsigned int num;
-    char* ascii;
+    char ascii;
 } KeyboardKey;
 
 KeyboardKey* keyboard_read_unsafe();

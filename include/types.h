@@ -16,7 +16,7 @@ typedef unsigned char uint8_t;
 typedef signed char int8_t;
 typedef unsigned long long uint64_t;
 typedef long long int64_t;
-
+typedef uint8_t byte;
 
 #define CHAR_BIT 8
 #define INT32_MAX 0x7fffffffL

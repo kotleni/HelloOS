@@ -6,4 +6,6 @@ typedef struct {
     void (*panic)(const char*);
 } kernel;
 
-static kernel* kern;
+kernel* get_kernel_instance(); 
+
+#define kern (get_kernel_instance())
