@@ -1,7 +1,10 @@
 /* HelloOS */
 
-#pragma once
+#ifndef H_STRING
+#define H_STRING
+
 #include <misc/malloc.h>
+#include <va_list.h>
 
 void strcat(char* s, const char* t);
 int strlen(char* str);
@@ -16,3 +19,7 @@ char *trim(char *s);
 void parse_args(const char *argsString, int *argc, char *argv[]);
 char *strtok_r(char *str, const char *delim, char **saveptr);
 char *strdup(const char *s);
+size_t vasprintf(char * buf, const char *fmt, va_list args);
+int sprintf(char * buf, const char *fmt, ...);
+
+#endif

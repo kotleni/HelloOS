@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_STDIO2
+#define H_STDIO2
 
 #include <kernel.h>
 #include <misc/malloc.h>
@@ -19,3 +20,5 @@ FILE *fopen(const char *pathname, const char *mode);
 int fclose(FILE *stream);
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
 //size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef H_TYPES
+#define H_TYPES
 
 #define NULL ((void *)0UL)
 
@@ -27,4 +28,6 @@ typedef uint8_t byte;
 #define bool uint8_t
 #define true 1
 #define false 0
+#endif
+
 #endif

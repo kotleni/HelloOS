@@ -7,7 +7,7 @@ static inline void parse_path(char *path, char **args, int *argc) {
     for(int i = 0; i < len; i++) {
         char ch = path[i];
         
-        //kern->printf("buff is %s\n", buff);
+        //kprintf("buff is %s\n", buff);
         switch(ch) {
             case '/':
                 if(strlen(buff) == 0) break;
@@ -50,7 +50,7 @@ static inline int entry_for_path(f32 *master_fs, const char *path, dir_entry *en
         int found = 0;
         for(int entryi = 0; entryi < dir.num_entries; entryi++) {
             currentry = &dir.entries[entryi];
-            //kern->printf("strcmp('%s', '%s')\n", currentry->name, name);
+            //kprintf("strcmp('%s', '%s')\n", currentry->name, name);
             if(strcmp(currentry->name, name) == 0) {
                 if(entry->name) free(entry->name);
                 *entry = *currentry;
@@ -83,7 +83,7 @@ FILE *fopen(const char *pathname, const char *mode) {
         free(entry.name);
         return NULL;
     }
-    //kern->printf("Got entry: %s [%d]\n", entry.name, entry.first_cluster);
+    //kprintf("Got entry: %s [%d]\n", entry.name, entry.first_cluster);
     free(entry.name);
 
     FILE *f = malloc(sizeof (FILE) + master_fs->cluster_size);

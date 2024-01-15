@@ -1,6 +1,7 @@
 /* HelloOS */
 
-#pragma once
+#ifndef H_PORTS
+#define H_PORTS
 
 unsigned char port_byte_in(unsigned short port);
 
@@ -17,3 +18,5 @@ void outportsm(unsigned short port, unsigned char * data, unsigned long size);
 #define inb port_byte_in
 #define outsw outportsm
 #define insw inportsm
+
+#endif

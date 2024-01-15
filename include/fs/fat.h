@@ -1,4 +1,6 @@
-#pragma once
+#ifndef H_FAT
+#define H_FAT
+
 #include <types.h>
 #include <drv/ata.h>
 #include <misc/string.h>
@@ -77,3 +79,5 @@ void fat_close(f32* fs);
 // internal
 void populate_dir(f32 *fs, directory *dir, uint32_t cluster);
 void populate_root_dir(f32 *fs, directory *dir);
+
+#endif

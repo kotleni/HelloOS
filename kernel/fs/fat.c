@@ -1,5 +1,7 @@
 #include <fs/fat.h>
 
+void next_dir_entry(f32 *fs, uint8_t *root_cluster, uint8_t *entry, uint8_t **nextentry, dir_entry *target_dirent, uint32_t cluster, uint32_t *secondcluster);
+
 static void trim_spaces(char *c, int max) {
     int i = 0;
     while(*c != ' ' && i++ < max) {
@@ -18,7 +20,7 @@ static uint16_t readi16(uint8_t *buff, size_t offset)
     return ubuff[1] << 8 | ubuff[0];
 }
 
-static uint32_t readi32(uint8_t *buff, size_t offset) {
+static inline uint32_t readi32(uint8_t *buff, size_t offset) {
     uint8_t *ubuff = buff + offset;
     return
         ((ubuff[3] << 24) & 0xFF000000) |
@@ -77,7 +79,7 @@ static uint32_t sector_for_cluster(f32 *fs, uint32_t cluster) {
 // CLUSTER NUMBERS START AT 2 (for some reason...)
 void getCluster(f32 *fs, uint8_t *buff, uint32_t cluster_number) { // static
     if(cluster_number >= EOC) {
-        kern->panic("Can't get cluster. Hit End Of Chain.");
+        kpanic("Can't get cluster. Hit End Of Chain.");
     }
     uint32_t sector = sector_for_cluster(fs, cluster_number);
     uint32_t sector_count = fs->bpb.sectors_per_cluster;
@@ -192,7 +194,7 @@ static uint8_t *locate_entries(f32 *fs, uint8_t *cluster_buffer, directory *dir,
             //     return 0;
             // }
             // fs->FAT[cluster] = next_cluster;
-            kern->panic("WTF? allocateCluster not should be executed in readonly FS!");
+            kpanic("WTF? allocateCluster not should be executed in readonly FS!");
         }
         cluster = next_cluster;
     }
@@ -329,7 +331,7 @@ void next_dir_entry(f32 *fs, uint8_t *root_cluster, uint8_t *entry, uint8_t **ne
             // and the previous entry was invalid!
             // It's possible the filesystem is corrupt or... you know...
             // my software could have bugs.
-            kern->printf("FOUND BAD DIRECTORY ENTRY!");
+            kprintf("FOUND BAD DIRECTORY ENTRY!");
         }
         // Load the cluster after the previous saved entries.
         getCluster(fs, root_cluster + fs->cluster_size, *secondcluster);
@@ -341,7 +343,7 @@ void next_dir_entry(f32 *fs, uint8_t *root_cluster, uint8_t *entry, uint8_t **ne
         if(!*nextentry) {
             // Still can't parse the directory entry.
             // Something is very wrong.
-            kern->panic("FAILED TO READ DIRECTORY ENTRY! THE SOFTWARE IS BUGGY!\n");
+            kpanic("FAILED TO READ DIRECTORY ENTRY! THE SOFTWARE IS BUGGY!\n");
         }
     }
 }
@@ -397,13 +399,13 @@ void print_directory(f32 *fs, directory *dir) {
 
     char *namebuff = malloc(max_name + 1);
     for(i = 0; i < dir->num_entries; i++) {
-//        kern->printf("[%d] %*s %c %8d bytes ",
+//        kprintf("[%d] %*s %c %8d bytes ",
 //               i,
 //               -max_name,
 //               dir->entries[i].name,
 //               dir->entries[i].dir_attrs & DIRECTORY?'D':' ',
 //               dir->entries[i].file_size, dir->entries[i].first_cluster);
-        kern->printf("[%d] ", i);
+        kprintf("[%d] ", i);
 
 
         uint32_t j;
@@ -415,7 +417,7 @@ void print_directory(f32 *fs, directory *dir) {
             namebuff[j] = dir->entries[i].name[j];
         }
 
-        kern->printf("%s %c %d ",
+        kprintf("%s %c %d ",
                namebuff,
                dir->entries[i].dir_attrs & DIRECTORY?'D':' ',
                dir->entries[i].file_size);
@@ -426,11 +428,11 @@ void print_directory(f32 *fs, directory *dir) {
             cluster = fs->FAT[cluster];
             if(cluster >= EOC) break;
             if(cluster == 0) {
-                kern->panic("BAD CLUSTER CHAIN! FS IS CORRUPT!");
+                kpanic("BAD CLUSTER CHAIN! FS IS CORRUPT!");
             }
             cluster_count++;
         }
-        kern->printf("clusters: [%d]\n", cluster_count);
+        kprintf("clusters: [%d]\n", cluster_count);
     }
     free(namebuff);
 }
@@ -453,22 +455,22 @@ bool fat_init() {
 
 f32 *fat_open(char *path) {
     f32 *fs = malloc(sizeof(f32));
-    //kern->printf("master_fs ptr is %d\n", fs);
+    //kprintf("master_fs ptr is %d\n", fs);
     if(ata_identify() == 0) {
         return NULL;
     }
-    kern->printf("ATA is identified!\n");
+    kprintf("ATA is identified!\n");
     read_bpb(fs);
 
     // Check is FAT32
     trim_spaces(fs->bpb.system_id, 8);
     if(strcmp(fs->bpb.system_id, "FAT32") != 0) {
-        kern->printf("FS(%s) is not FAT32!\n", fs->bpb.system_id);
+        kprintf("FS(%s) is not FAT32!\n", fs->bpb.system_id);
         free(fs);
         return NULL;
     }
 
-    kern->printf("Sectors per cluster: %d\n", fs->bpb.sectors_per_cluster);
+    kprintf("Sectors per cluster: %d\n", fs->bpb.sectors_per_cluster);
 
     fs->partition_begin_sector = 0;
     fs->fat_begin_sector = fs->partition_begin_sector + fs->bpb.reserved_sectors;
@@ -494,7 +496,7 @@ f32 *fat_open(char *path) {
 }
 
 void fat_close(f32* fs) {
-    kern->printf("Destroying FAT32 filesystem.\n");
+    kprintf("Destroying FAT32 filesystem.\n");
     free(fs->FAT);
     free(fs);
 }

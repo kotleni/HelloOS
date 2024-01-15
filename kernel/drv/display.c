@@ -17,7 +17,7 @@ void display_init() {
     display_clear();
     disable_cursor();
 
-    kern->printf("Video initialized.\n");
+    kprintf("Video initialized.\n");
 }
 
 void display_clear() {

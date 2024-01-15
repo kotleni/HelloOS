@@ -20,7 +20,7 @@ void* malloc(size_t size) {
     }
 
 	if (size > STATIC_ALLOC_SIZE - (free_ptr - start_ptr)) {
-		kern->panic("All available memory is allocated!");
+		kpanic("All available memory is allocated!");
         return NULL;
     }
 
@@ -33,7 +33,7 @@ void* malloc(size_t size) {
 
     // If not found, create new node
     if(next_node_index >= MAX_MEM_NODES_COUNT-1) {
-        kern->panic("All nodes are used!");
+        kpanic("All nodes are used!");
     }
 
     void* ptr = (void*)free_ptr;
@@ -47,7 +47,7 @@ void* malloc(size_t size) {
     nodes[next_node_index] = node;
     next_node_index++;
 
-	//kern->printf("Allocated ptr=%d, next ptr=%d, +%d bytes\n", ptr, free_ptr, (void*)free_ptr - ptr);
+	//kprintf("Allocated ptr=%d, next ptr=%d, +%d bytes\n", ptr, free_ptr, (void*)free_ptr - ptr);
 
     return ptr;
 }

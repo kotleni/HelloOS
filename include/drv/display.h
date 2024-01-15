@@ -1,6 +1,7 @@
 /* HelloOS */
 
-#pragma once
+#ifndef H_DISPLAY
+#define H_DISPLAY
 
 #include <misc/malloc.h>
 #include <misc/ports.h>
@@ -48,3 +49,5 @@ void disable_cursor();
 void display_putch(char c);
 
 void display_puts(char* str);
+
+#endif
