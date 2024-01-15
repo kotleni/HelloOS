@@ -15,6 +15,10 @@
 #include <multiboot.h>
 #include <stdio2.h>
 
+extern uint8_t _kernel_base[];
+extern uint8_t _malloc_base[];
+multiboot_info_t *mbi;
+
 #define KEY_ENTER 28
 #define KEY_BACKSPACE 14
 
@@ -73,7 +77,7 @@ void new_shell() {
         char* cmd = trim(args[0]);
 
 		if(strcmp(cmd, "info") == 0) {
-
+			
 		} else {
 			kern->printf("Unknown command %s!\n", args[0]);
 		}
@@ -257,11 +261,6 @@ void kernel_init() {
 	kern->assert = &kassert;
 }
 
-// extern uint32_t kernel_end;
-// extern uint32_t kernel_base;
-extern uint8_t _kernel_base[];
-extern uint8_t _malloc_base[];
-
 void kmain(unsigned long magic, unsigned long addr) {
 	mm_init(_malloc_base);
     kernel_init();
@@ -277,7 +276,6 @@ void kmain(unsigned long magic, unsigned long addr) {
       kern->panic("Invalid magic number!");
     }
 
-	multiboot_info_t *mbi;
   	mbi = (multiboot_info_t *) addr;
 	
 	kern->printf("Kernel base addr: 0x%x\n", _kernel_base);
