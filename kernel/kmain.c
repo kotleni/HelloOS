@@ -289,39 +289,22 @@ void kmain(unsigned long magic, unsigned long addr) {
 	init_serial();
     display_init();
 
-	multiboot_info_t *mbi;
-  	/* Am I booted by a Multiboot-compliant boot loader? */
+  	/* Check multiboot magic */
   	if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
     {
       kern->printf("Magic number is 0x%x, but expect 0x%x\n", (unsigned) magic, MULTIBOOT_BOOTLOADER_MAGIC);
       kern->panic("Invalid magic number!");
     }
 
-  	/* Set MBI to the address of the Multiboot information structure. */
+	multiboot_info_t *mbi;
   	mbi = (multiboot_info_t *) addr;
 	
 	kern->printf("Kernel base addr: 0x%x\n", _kernel_base);
 	kern->printf("Kernel end addr: 0x%x\n", _malloc_base);
 	kern->printf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
-	//kern->printf("Kernel end addr: %d\n", kernel_end);
-    //kern->printf("Available RAM: %dkb\n", getRamSize() / 1024);
-
-    f32* master_fs = makeFilesystem("");
-    kern->printf("master_fs ptr is %d\n", master_fs);
-    if(master_fs == NULL) {
-        kern->panic("Failed to create fat32 filesystem. Disk may be corrupt.");
-        return;
-    }
-
-	// FILE *file = fopen("/motd.txt", "r");
-	// kern->printf("Motd file openned success!\n");
-	// char buff[32];
-	// fread(buff, 1, 0, file);
-	// kern->printf("%s\n", buff);
-	// fclose(file);
 
     new_shell();
 
-	// This function on should be finished
+	// This function not should be finished
     kern->panic("kmain is ended");
 }
