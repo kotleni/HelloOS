@@ -321,7 +321,9 @@ void kmain(unsigned long magic, unsigned long addr) {
 	kern->assert(file != NULL, "Motd file not found!");
 	char buff[32];
 	fread(buff, 32, 1, file);
-	kern->printf("[%s]\n", buff);
+	display_putch('\n');
+	display_puts(buff);
+	display_putch('\n');
 	fclose(file);
 
     new_shell();

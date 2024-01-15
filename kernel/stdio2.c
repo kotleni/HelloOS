@@ -50,7 +50,7 @@ static inline int entry_for_path(f32 *master_fs, const char *path, dir_entry *en
         int found = 0;
         for(int entryi = 0; entryi < dir.num_entries; entryi++) {
             currentry = &dir.entries[entryi];
-            kern->printf("strcmp('%s', '%s')\n", currentry->name, name);
+            //kern->printf("strcmp('%s', '%s')\n", currentry->name, name);
             if(strcmp(currentry->name, name) == 0) {
                 if(entry->name) free(entry->name);
                 *entry = *currentry;
