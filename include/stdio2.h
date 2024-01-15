@@ -6,6 +6,7 @@
 #include <fs/fat.h>
 
 typedef struct {
+    f32 *master_fs;
     //struct dir_entry file_ent;
     uint32_t curr_cluster;
     uint32_t file_size; // total file size

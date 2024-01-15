@@ -6,7 +6,7 @@
 #include <misc/malloc.h>
 #include <kernel.h>
 
-struct bios_parameter_block {
+typedef struct {
     uint16_t bytes_per_sector;          // IMPORTANT
     uint8_t sectors_per_cluster;        // IMPORTANT
     uint16_t reserved_sectors;          // IMPORTANT
@@ -33,7 +33,7 @@ struct bios_parameter_block {
     uint32_t volume_id;
     char volume_label[12];
     char system_id[9];
-};
+} bios_parameter_block;
 
 #define READONLY  1
 #define HIDDEN    (1 << 1)
@@ -43,59 +43,37 @@ struct bios_parameter_block {
 #define ARCHIVE   (1 << 5)
 #define LFN (READONLY | HIDDEN | SYSTEM | VolumeID)
 
-struct dir_entry {
+typedef struct {
     char *name;
     uint8_t dir_attrs;
     uint32_t first_cluster;
     uint32_t file_size;
-};
+} dir_entry;
 
-struct directory {
+typedef struct {
     uint32_t cluster;
-    struct dir_entry *entries;
+    dir_entry *entries;
     uint32_t num_entries;
-};
+} directory;
 
-// REFACTOR
-// I want to get rid of this from the header. This should be internal
-// implementation, but for now, it's too convenient for stdio.c impl.
-
-// EOC = End Of Chain
+// End Of Chain
 #define EOC 0x0FFFFFF8
 
-struct f32 {
+typedef struct {
     //FILE *f;
     uint32_t *FAT;
-    struct bios_parameter_block bpb;
+    bios_parameter_block bpb;
     uint32_t partition_begin_sector;
     uint32_t fat_begin_sector;
     uint32_t cluster_begin_sector;
     uint32_t cluster_size;
     uint32_t cluster_alloc_hint;
-};
+} f32;
 
-typedef struct f32 f32;
+bool fat_init();
+f32 *fat_open(char *path);
+void fat_close(f32* fs);
 
-void getCluster(f32 *fs, uint8_t *buff, uint32_t cluster_number);
-uint32_t get_next_cluster_id(f32 *fs, uint32_t cluster);
-
-// END REFACTOR
-
-f32 *makeFilesystem(char *fatSystem);
-void destroyFilesystem(f32 *fs);
-
-const struct bios_parameter_block *getBPB(f32 *fs);
-
-void populate_root_dir(f32 *fs, struct directory *dir);
-void populate_dir(f32 *fs, struct directory *dir, uint32_t cluster);
-void free_directory(f32 *fs, struct directory *dir);
-
-uint8_t *readFile(f32 *fs, struct dir_entry *dirent);
-void writeFile(f32 *fs, struct directory *dir, uint8_t *file, char *fname, uint32_t flen);
-void mkdir(f32 *fs, struct directory *dir, char *dirname);
-void delFile(f32 *fs, struct directory *dir, char *filename);
-
-void print_directory(f32 *fs, struct directory *dir);
-uint32_t count_free_clusters(f32 *fs);
-
-extern f32 *master_fs;
+// internal
+void populate_dir(f32 *fs, directory *dir, uint32_t cluster);
+void populate_root_dir(f32 *fs, directory *dir);

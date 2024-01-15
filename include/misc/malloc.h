@@ -17,4 +17,5 @@ typedef struct {
 
 void mm_init(uint32_t malloc_start_ptr);
 void* malloc(size_t size);
+void* realloc(void* oldptr, size_t size);
 void free(void *fre);

@@ -16,7 +16,10 @@
         "stdio.h": "c",
         "stdio2.h": "c",
         "types.h": "c",
-        "multiboot.h": "c"
+        "multiboot.h": "c",
+        "fat.h": "c",
+        "va_list.h": "c",
+        "defines.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

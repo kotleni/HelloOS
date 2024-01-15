@@ -1,23 +1,57 @@
 #include <stdio2.h>
 
-static inline int entry_for_path(const char *path, struct dir_entry *entry) {
-    struct directory dir;
+static inline void parse_path(char *path, char **args, int *argc) {
+    int len = strlen(path);
+
+    char *buff = malloc(sizeof(char) * 32);
+    for(int i = 0; i < len; i++) {
+        char ch = path[i];
+        
+        //kern->printf("buff is %s\n", buff);
+        switch(ch) {
+            case '/':
+                if(strlen(buff) == 0) break;
+
+                args[(*argc)++] = buff;
+                buff = malloc(sizeof(char) * 32);
+                break;
+            default:
+                char str[2];
+                str[0] = ch;
+                str[1] = '\0';
+                strcat(buff, str);
+                break;
+        }
+    }
+
+    if(strlen(buff) > 0) {
+        args[(*argc)++] = buff;
+    }
+}
+
+static inline int entry_for_path(f32 *master_fs, const char *path, dir_entry *entry) {
+    char **path_args = malloc(sizeof(char*) * 8);
+    int path_argc = 0;
+    parse_path(path, path_args, &path_argc);
+
+    directory dir;
     populate_root_dir(master_fs, &dir);
     int found_file = 0;
     if(path[0] != '/') {
         return found_file;
     }
 
-    char *cutpath = strdup(path);
-    char *tokstate = NULL;
-    char *next_dir = strtok_r(cutpath, "/", &tokstate);
-    struct dir_entry *currentry = NULL;
+    dir_entry *currentry = NULL;
     entry->name = NULL;
-    while (next_dir) {
+
+    for(int i = 0; i < path_argc; i++) {
+        char* name = path_args[i];
+
         int found = 0;
         for(int entryi = 0; entryi < dir.num_entries; entryi++) {
             currentry = &dir.entries[entryi];
-            if(strcmp(currentry->name, next_dir) == 0) {
+            kern->printf("strcmp('%s', '%s')\n", currentry->name, name);
+            if(strcmp(currentry->name, name) == 0) {
                 if(entry->name) free(entry->name);
                 *entry = *currentry;
                 // TODO: Make sure this doesn't leak. Very dangerous:
@@ -32,24 +66,24 @@ static inline int entry_for_path(const char *path, struct dir_entry *entry) {
             }
         }
         if(!found) {
-            free(cutpath);
             free_directory(master_fs, &dir);
             return 0;
         }
-        next_dir = strtok_r(NULL, "/", &tokstate);
     }
+
     free_directory(master_fs, &dir);
-    free(cutpath);
     return 1;
 }
 
 FILE *fopen(const char *pathname, const char *mode) {
-    struct dir_entry entry;
-    if(!entry_for_path(pathname, &entry)) {
+    f32 *master_fs = fat_open(pathname);
+
+    dir_entry entry;
+    if(!entry_for_path(master_fs, pathname, &entry)) {
         free(entry.name);
         return NULL;
     }
-//    printf("Got entry: %s [%d]\n", entry.name, entry.first_cluster);
+    //kern->printf("Got entry: %s [%d]\n", entry.name, entry.first_cluster);
     free(entry.name);
 
     FILE *f = malloc(sizeof (FILE) + master_fs->cluster_size);
@@ -57,6 +91,7 @@ FILE *fopen(const char *pathname, const char *mode) {
     f->file_size = entry.file_size;
     f->fptr = 0;
     f->buffptr = 0;
+    f->master_fs = master_fs;
     getCluster(master_fs, f->currbuf, f->curr_cluster);
     return f;
 }
@@ -74,15 +109,15 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     }
     //printf("Reading %d bytes.\n", bytes_to_read);
     while(bytes_to_read > 0) {
-        if(stream->buffptr + bytes_to_read > master_fs->cluster_size) {
+        if(stream->buffptr + bytes_to_read > stream->master_fs->cluster_size) {
             // Need to read at least 1 more cluster
-            size_t to_read_in_this_cluster = master_fs->cluster_size - stream->buffptr;
+            size_t to_read_in_this_cluster = stream->master_fs->cluster_size - stream->buffptr;
             memcpy(ptr + bytes_read, stream->currbuf + stream->buffptr, to_read_in_this_cluster);
             bytes_read += to_read_in_this_cluster;
             //printf("buffptr = 0\n");
             stream->buffptr = 0;
             //printf("Getting next cluster.\n");
-            stream->curr_cluster = get_next_cluster_id(master_fs, stream->curr_cluster);
+            stream->curr_cluster = get_next_cluster_id(stream->master_fs, stream->curr_cluster);
             //printf("Next cluster: %x\n", stream->curr_cluster);
             if(stream->curr_cluster >= EOC) {
                 //printf("Returning.\n");
@@ -90,7 +125,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
                 return bytes_read;
             }
             //printf("getting next cluster.\n");
-            getCluster(master_fs, stream->currbuf, stream->curr_cluster);
+            getCluster(stream->master_fs, stream->currbuf, stream->curr_cluster);
             bytes_to_read -= to_read_in_this_cluster;
         }
         else {

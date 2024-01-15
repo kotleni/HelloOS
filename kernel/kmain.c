@@ -272,9 +272,22 @@ void kpanic(const char* message) {
     for(;;) {}
 }
 
+void kassert(bool is_ok, const char* fail_message) {
+	if(is_ok) return;
+
+	char title[] = "ASSERT FAIED:\n";
+
+	int msg_len = strlen(fail_message);
+	char* line = malloc((sizeof(char) * msg_len) + sizeof(title));
+	strcat(line, "ASSERT FAIED:\n");
+	strcat(line, fail_message);
+	kern->panic(line);
+}
+
 void kernel_init() {
     kern->printf = &kprintf;
     kern->panic = &kpanic;
+	kern->assert = &kassert;
 }
 
 // extern uint32_t kernel_end;
@@ -286,8 +299,9 @@ void kmain(unsigned long magic, unsigned long addr) {
 	mm_init(_malloc_base);
     kernel_init();
     keyboard_init();
-	init_serial();
     display_init();
+	init_serial();
+	fat_init();
 
   	/* Check multiboot magic */
   	if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
@@ -302,6 +316,13 @@ void kmain(unsigned long magic, unsigned long addr) {
 	kern->printf("Kernel base addr: 0x%x\n", _kernel_base);
 	kern->printf("Kernel end addr: 0x%x\n", _malloc_base);
 	kern->printf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
+
+	FILE *file = fopen("/ETC/MOTD", "r");
+	kern->assert(file != NULL, "Motd file not found!");
+	char buff[32];
+	fread(buff, 32, 1, file);
+	kern->printf("[%s]\n", buff);
+	fclose(file);
 
     new_shell();
 

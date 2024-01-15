@@ -47,9 +47,14 @@ void* malloc(size_t size) {
     nodes[next_node_index] = node;
     next_node_index++;
 
-	kern->printf("Allocated ptr=%d, next ptr=%d, +%d bytes\n", ptr, free_ptr, (void*)free_ptr - ptr);
+	//kern->printf("Allocated ptr=%d, next ptr=%d, +%d bytes\n", ptr, free_ptr, (void*)free_ptr - ptr);
 
     return ptr;
+}
+
+void* realloc(void* oldptr, size_t size) {
+    free(oldptr);
+    return malloc(size);
 }
 
 void free(void *fre) {

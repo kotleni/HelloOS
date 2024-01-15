@@ -17,7 +17,7 @@ floppy:
 	dd if=/dev/zero of=$(BLD_DIR)/floppy.img bs=512 count=2880
 	mkfs.fat -F 32 -n "DRIVE" $(BLD_DIR)/floppy.img
 	mmd -i $(BLD_DIR)/floppy.img "::etc"
-	mcopy -i $(BLD_DIR)/floppy.img $(BASE_FS)/motd.txt "::etc/motd.txt"
+	mcopy -i $(BLD_DIR)/floppy.img $(BASE_FS)/etc/motd "::etc/motd"
 
 fedora:
 	nasm -f elf32 boot/boot.asm -o $(TMP_DIR)/boot.o
