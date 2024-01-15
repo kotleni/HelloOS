@@ -12,7 +12,11 @@
         "malloc.h": "c",
         "kernel.h": "c",
         "ports.h": "c",
-        "display.h": "c"
+        "display.h": "c",
+        "stdio.h": "c",
+        "stdio2.h": "c",
+        "types.h": "c",
+        "multiboot.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

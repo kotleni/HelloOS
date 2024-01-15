@@ -11,6 +11,8 @@
 #include <kernel.h>
 #include <va_list.h>
 #include <defines.h>
+#include <multiboot.h>
+#include <stdio2.h>
 
 #define KEY_ENTER 28
 #define KEY_BACKSPACE 14
@@ -280,24 +282,43 @@ void kernel_init() {
 extern uint8_t _kernel_base[];
 extern uint8_t _malloc_base[];
 
-void kmain() {
-	mm_init(0xff);
+void kmain(unsigned long magic, unsigned long addr) {
+	mm_init(_malloc_base);
     kernel_init();
     keyboard_init();
 	init_serial();
     display_init();
+
+	multiboot_info_t *mbi;
+  	/* Am I booted by a Multiboot-compliant boot loader? */
+  	if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
+    {
+      kern->printf("Magic number is 0x%x, but expect 0x%x\n", (unsigned) magic, MULTIBOOT_BOOTLOADER_MAGIC);
+      kern->panic("Invalid magic number!");
+    }
+
+  	/* Set MBI to the address of the Multiboot information structure. */
+  	mbi = (multiboot_info_t *) addr;
 	
 	kern->printf("Kernel base addr: 0x%x\n", _kernel_base);
 	kern->printf("Kernel end addr: 0x%x\n", _malloc_base);
+	kern->printf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
 	//kern->printf("Kernel end addr: %d\n", kernel_end);
     //kern->printf("Available RAM: %dkb\n", getRamSize() / 1024);
 
     f32* master_fs = makeFilesystem("");
-    kern->printf("master_fs ptr is %d", master_fs);
+    kern->printf("master_fs ptr is %d\n", master_fs);
     if(master_fs == NULL) {
         kern->panic("Failed to create fat32 filesystem. Disk may be corrupt.");
         return;
     }
+
+	// FILE *file = fopen("/motd.txt", "r");
+	// kern->printf("Motd file openned success!\n");
+	// char buff[32];
+	// fread(buff, 1, 0, file);
+	// kern->printf("%s\n", buff);
+	// fclose(file);
 
     new_shell();
 

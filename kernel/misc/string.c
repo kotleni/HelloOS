@@ -147,3 +147,43 @@ void parse_args(const char *argsString, int *argc, char *argv[]) {
         ++(*argc);
     }
 }
+
+char *strtok_r(char *str, const char *delim, char **saveptr) {
+    char *begin;
+    if(str) {
+        begin = str;
+    }
+    else if (*saveptr) {
+        begin = *saveptr;
+    }
+    else {
+        return NULL;
+    }
+
+    while(strchr(delim, begin[0])) {
+        begin++;
+    }
+
+
+    char *next = NULL;
+    for(int i = 0; i < strlen(delim); i++) {
+        char *temp = strchr(begin, delim[i]);
+        if(temp < next || next == NULL) {
+            next = temp;
+        }
+    }
+    if(!next) {
+        *saveptr = NULL;
+        return begin;
+    }
+    *next = 0;
+    *saveptr=next+1;
+    return begin;
+}
+
+char *strdup(const char *s) {
+    char *news = malloc(strlen(s) + 1);
+    char *temp = news;
+    while(*temp++ = *s++);
+    return news;
+}

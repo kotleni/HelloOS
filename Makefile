@@ -30,5 +30,6 @@ fedora:
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/string.o -c kernel/misc/string.c
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/memory.o -c kernel/misc/memory.c
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/fat.o -c kernel/fs/fat.c
+	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/stdio2.o -c kernel/stdio2.c
 	$(GCC_BIN_FEDORA) $(GCC_ARGS) -o $(TMP_DIR)/kernel.o -c kernel/kernel.c
-	$(LD_BIN_FEDORA) -m elf_i386 -T link.ld -o $(BLD_DIR)/kernel $(TMP_DIR)/boot.o $(TMP_DIR)/kmain.o $(TMP_DIR)/display.o $(TMP_DIR)/keyboard.o $(TMP_DIR)/ata.o $(TMP_DIR)/ports.o $(TMP_DIR)/malloc.o $(TMP_DIR)/string.o $(TMP_DIR)/memory.o $(TMP_DIR)/fat.o $(TMP_DIR)/kernel.o
+	$(LD_BIN_FEDORA) -m elf_i386 -T link.ld -o $(BLD_DIR)/kernel $(TMP_DIR)/boot.o $(TMP_DIR)/kmain.o $(TMP_DIR)/display.o $(TMP_DIR)/keyboard.o $(TMP_DIR)/ata.o $(TMP_DIR)/ports.o $(TMP_DIR)/malloc.o $(TMP_DIR)/string.o $(TMP_DIR)/memory.o $(TMP_DIR)/fat.o $(TMP_DIR)/stdio2.o $(TMP_DIR)/kernel.o

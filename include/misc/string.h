@@ -14,3 +14,5 @@ char* toupper(char* string);
 int isspace(int c);
 char *trim(char *s);
 void parse_args(const char *argsString, int *argc, char *argv[]);
+char *strtok_r(char *str, const char *delim, char **saveptr);
+char *strdup(const char *s);

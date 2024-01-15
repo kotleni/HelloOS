@@ -532,7 +532,7 @@ void populate_dir(f32 *fs, struct directory *dir, uint32_t cluster) {
     uint32_t entry_count = 0;
 
     while(1) {
-        max_dirs += dirs_per_cluster;
+        max_dirs += dirs_per_cluster;   
         dir->entries = malloc(max_dirs * sizeof (struct dir_entry));
         // Double the size in case we need to read a directory entry that
         // spans the bounds of a cluster.
