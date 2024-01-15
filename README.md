@@ -9,7 +9,7 @@ Simple home made OS for x86.
 - [x] Text mode video driver
 - [x] ATA driver
 - [x] Keyboard driver
-- [ ] Serial driver
+- [x] Serial driver
 - [x] FAT32 filesystem
 
 ### Dependecies
