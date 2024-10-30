@@ -6,7 +6,7 @@ BASE_FS := basefs/
 GCC_BIN := x86_64-elf-gcc
 LD_BIN := x86_64-elf-ld
 
-GCC_ARGS := -m32 -I$(INC_DIR) -ffreestanding
+GCC_ARGS := -m32 -I$(INC_DIR) -ffreestanding -nostdlib -nostartfiles
 
 all:
 	echo Use another target instead.
