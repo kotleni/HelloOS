@@ -6,6 +6,16 @@ extern uint8_t _kernel_base[];
 extern uint8_t _malloc_base[];
 multiboot_info_t *mbi;
 
+void putpixel(int pos_x, int pos_y, unsigned char VGA_COLOR)
+{
+    unsigned char* location = (unsigned char*)0xA0000 + 320 * pos_y + pos_x;
+    *location = VGA_COLOR;
+}
+
+void run_drawlogo() {
+	putpixel(8, 8, 0xFC);
+}
+
 void new_shell() {
 	char* input = malloc(sizeof(char) * 64);
 
@@ -28,8 +38,8 @@ void new_shell() {
 		parse_args(input, &argc, args);
         char* cmd = trim(args[0]);
 
-		if(strcmp(cmd, "info") == 0) {
-			
+		if(strcmp(cmd, "drawlogo") == 0) {
+			run_drawlogo();
 		} else {
 			kprintf("Unknown command %s!\n", args[0]);
 		}
