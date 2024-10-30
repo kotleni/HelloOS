@@ -1,4 +1,4 @@
-TMP_DIR := /tmp
+TMP_DIR := build/
 BLD_DIR := build/
 INC_DIR := include/
 BASE_FS := basefs/
