@@ -1,6 +1,6 @@
 #include <kernel.h>
 
-int kprintf(const char *fmt, ...) {
+int kprintf(char *fmt, ...) {
 	char buf[1024] = {-1};
 	va_list args;
 	va_start(args, fmt);
@@ -15,7 +15,7 @@ int kprintf(const char *fmt, ...) {
 	return out;
 }
 
-void kpanic(const char* message) {
+void kpanic(char* message) {
     display_puts("\n========[PANIC]========\n");
     display_puts(message);
     display_puts("\n=======================\n");
@@ -23,7 +23,7 @@ void kpanic(const char* message) {
     for(;;) {}
 }
 
-void kassert(bool is_ok, const char* fail_message) {
+void kassert(bool is_ok, char* fail_message) {
 	if(is_ok) return;
 
 	char title[] = "ASSERT FAIED:\n";

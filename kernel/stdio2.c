@@ -29,7 +29,7 @@ static inline void parse_path(char *path, char **args, int *argc) {
     }
 }
 
-static inline int entry_for_path(f32 *master_fs, const char *path, dir_entry *entry) {
+static inline int entry_for_path(f32 *master_fs, char *path, dir_entry *entry) {
     char **path_args = malloc(sizeof(char*) * 8);
     int path_argc = 0;
     parse_path(path, path_args, &path_argc);
@@ -75,7 +75,7 @@ static inline int entry_for_path(f32 *master_fs, const char *path, dir_entry *en
     return 1;
 }
 
-FILE *fopen(const char *pathname, const char *mode) {
+FILE *fopen(char *pathname, char *mode) {
     f32 *master_fs = fat_open(pathname);
 
     dir_entry entry;

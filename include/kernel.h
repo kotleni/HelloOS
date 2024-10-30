@@ -22,9 +22,9 @@
  * @param fmt Formatted string to print
  * @param ... Additional arguments to format
  */
-int kprintf(const char *fmt, ...);
-void kpanic(const char* message);
-void kassert(bool is_ok, const char* fail_message);
+int kprintf(char *fmt, ...);
+void kpanic(char* message);
+void kassert(bool is_ok, char* fail_message);
 void kreadl(char* input);
 
 #endif

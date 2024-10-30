@@ -1,10 +1,10 @@
-TMP_DIR := /tmp
+TMP_DIR := build/
 BLD_DIR := build/
 INC_DIR := include/
 BASE_FS := basefs/
 
-GCC_BIN := x86_64-elf-gcc
-LD_BIN := x86_64-elf-ld
+GCC_BIN := i686-elf-gcc
+LD_BIN := i686-elf-ld
 
 GCC_ARGS := -m32 -I$(INC_DIR) -ffreestanding -nostdlib -nostartfiles
 
