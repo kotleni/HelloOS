@@ -358,7 +358,7 @@ void next_dir_entry(f32 *fs, uint8_t *root_cluster, uint8_t *entry, uint8_t **ne
 //     flushFAT(fs);
 // }
 
-void free_directory(f32 *fs, directory *dir){
+void free_directory(f32 *fs, directory *dir) {
     uint32_t i;
     for(i = 0; i < dir->num_entries; i++) {
         free(dir->entries[i].name);

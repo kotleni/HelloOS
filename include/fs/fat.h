@@ -76,6 +76,10 @@ bool fat_init();
 f32 *fat_open(char *path);
 void fat_close(f32* fs);
 
+void free_directory(f32 *fs, directory *dir);
+void getCluster(f32 *fs, uint8_t *buff, uint32_t cluster_number);
+uint32_t get_next_cluster_id(f32 *fs, uint32_t cluster);
+
 // internal
 void populate_dir(f32 *fs, directory *dir, uint32_t cluster);
 void populate_root_dir(f32 *fs, directory *dir);
