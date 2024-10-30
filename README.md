@@ -23,6 +23,11 @@ Fedora:
 dnf install qemu glibc-devel nasm
 ```
 
+Arch:
+```bash
+pacman -Syu qemu-full base-devel nasm
+```
+
 MacOS:
 ```bash
 brew install x86_64-elf-gcc nasm qemu-system-x86
@@ -35,7 +40,7 @@ cd helloos
 mkdir build
 
 make floppy
-make
+make base
 ```
 
 ### Run on qemu
