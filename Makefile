@@ -11,11 +11,24 @@ GCC_ARGS := -m32 -I$(INC_DIR) -ffreestanding -nostdlib -nostartfiles
 all:
 	echo Use another target instead.
 
-floppy:
-	dd if=/dev/zero of=$(BLD_DIR)/floppy.img bs=512 count=2880
-	mkfs.fat -F 32 -n "DRIVE" $(BLD_DIR)/floppy.img
-	mmd -i $(BLD_DIR)/floppy.img "::etc"
-	mcopy -i $(BLD_DIR)/floppy.img $(BASE_FS)/etc/motd "::etc/motd"
+qemu:
+	qemu-system-x86_64 -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF_CODE.fd
+
+pack:
+	grub-mkrescue -p /boot -o build/grub.iso --modules=multiboot
+	mkdir -p build/grub
+	sudo mount build/grub.iso build/grub
+	mkdir -p build/fs
+	dd if=/dev/zero of=$(BLD_DIR)/fs.img bs=512 count=184320
+	mkfs.fat -F 32 -n "DRIVE" $(BLD_DIR)/fs.img
+	sudo mount build/fs.img build/fs
+	
+	sudo cp -r build/grub/* build/fs/
+	sudo cp -r basefs/* build/fs/
+	sudo cp build/kernel build/fs/boot/kernel
+	sudo umount build/grub/
+	sudo umount build/fs/
+	sync
 
 base:
 	nasm -f elf32 boot/boot.asm -o $(TMP_DIR)/boot.o
