@@ -10,12 +10,12 @@ GCC_ARGS := -m32 -I$(INC_DIR) -I/usr/include/efi/ -ffreestanding -nostdlib -nost
 
 all:
 	echo Use another target instead.
-
+	
 qemu:
-	qemu-system-x86_64 -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF.fd -vga vmware
+	qemu-system-x86_64 -nodefaults -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF.fd -vga std -machine "q35,accel=kvm:tcg" -serial stdio
 
 pack:
-	grub-mkrescue -p /boot -o build/grub.iso --modules="fat multiboot"
+	grub-mkrescue -p /boot -o build/grub.iso --modules="fat multiboot chain"
 	mkdir -p build/grub
 	sudo mount build/grub.iso build/grub
 	mkdir -p build/fs
@@ -25,6 +25,7 @@ pack:
 	
 	sudo cp -r build/grub/* build/fs/
 	sudo cp -r basefs/* build/fs/
+	sudo cp build/bootloaderefi.efi build/fs/boot/bootloaderefi.efi
 	sudo cp build/kernel build/fs/boot/kernel
 	sudo umount build/grub/
 	sudo umount build/fs/
