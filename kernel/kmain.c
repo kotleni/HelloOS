@@ -120,14 +120,15 @@ void kmain(unsigned long magic, unsigned long addr) {
 
 	run_drawlogo();
 
-	FILE *file = fopen("/ETC/MOTD", "r");
-	kassert(file != NULL, "Motd file not found!");
-	char buff[256];
-	fread(buff, 256, 1, file);
-	display_putch('\n');
-	display_puts(buff);
-	display_putch('\n');
-	fclose(file);
+	// FIXME: Broken after last changes
+	// FILE *file = fopen("/ETC/MOTD", "r");
+	// kassert(file != NULL, "Motd file not found!");
+	// char buff[256];
+	// fread(buff, 256, 1, file);
+	// display_putch('\n');
+	// display_puts(buff);
+	// display_putch('\n');
+	// fclose(file);
 
     new_shell();
 
