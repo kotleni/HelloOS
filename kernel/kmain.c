@@ -8,28 +8,35 @@ multiboot_info_t *mbi;
 
 #define MULTIBOOT_CHECK_FLAG(flags, flag) (((flags) & (flag)) == (flag))
 
-#define VGA_WIDTH 320
-#define VGA_HEIGHT 200
-#define VGA_ADDRESS 0xA0000 // VGA framebuffer address
+uint8_t *vga_buffer; // FIXME: rename
+int bpp, pitch; // FIXME
 
-void draw_pixel(int x, int y, uint8_t color) {
-    if (x < 0 || x >= VGA_WIDTH || y < 0 || y >= VGA_HEIGHT) {
-        return; // Out of bounds
-    }
-    uint8_t *vga_buffer = (uint8_t *)VGA_ADDRESS;
-    vga_buffer[y * VGA_WIDTH + x] = color; // Set pixel color
+void putpixel(unsigned char* screen, int x,int y, int color) {
+	int pixelwidth = bpp / 8;
+
+    unsigned where = x*pixelwidth + y*pitch;
+    screen[where] = color & 255;              // BLUE
+    screen[where + 1] = (color >> 8) & 255;   // GREEN
+    screen[where + 2] = (color >> 16) & 255;  // RED
 }
 
-void draw_rectangle(int x, int y, int width, int height, uint8_t color) {
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-            draw_pixel(x + i, y + j, color);
+void fillrect(unsigned char *vram, unsigned char r, unsigned char g, unsigned char b, unsigned char w, unsigned char h) {
+    unsigned char *where = vram;
+    int i, j;
+
+    for (i = 0; i < w; i++) {
+        for (j = 0; j < h; j++) {
+            putpixel(vram, j, i, (r << 16) + (g << 8) + b);
+            //where[j*pixelwidth] = r;
+            //where[j*pixelwidth + 1] = g;
+            //where[j*pixelwidth + 2] = b;
         }
+        where+=pitch;
     }
 }
 
 void run_drawlogo() {
-    draw_rectangle(50, 50, 100, 50, 4);
+    fillrect(vga_buffer, 255, 255, 255, 100, 100);
 }
 
 void new_shell() {
@@ -89,19 +96,29 @@ void kmain(unsigned long magic, unsigned long addr) {
 	kprintf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
 
 	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_FRAMEBUFFER_INFO)) {
-		kprintf("Framebuffer addr: 0x%x, type: %x, size: %dx%d\n", mbi->framebuffer_addr, mbi->framebuffer_type, mbi->framebuffer_width, mbi->framebuffer_height);
+		kprintf("Framebuffer info:\n");
+		kprintf("  ptr:  : 0x%x\n", mbi->framebuffer_addr);
+		kprintf("  size  : %dx%d\n", mbi->framebuffer_width, mbi->framebuffer_height);
+		kprintf("  pitch : %d\n", mbi->framebuffer_pitch);
+		kprintf("  bpp   : %d\n", mbi->framebuffer_bpp);
+
+		// FIX
+		pitch = mbi->framebuffer_pitch;
+		bpp = mbi->framebuffer_bpp;
 	}
 
 	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_FRAMEBUFFER_INFO)) {
 		kprintf("VBE mode: 0x%x\n", mbi->vbe_mode);
-	}
+	} // TODO: Crash or use text mode? if else
 
 	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_CMDLINE)) {
 		kprintf("Kernel arguments: %s\n", mbi->cmdline);
 	}
 
-	// unsigned char *framebuffer = (void*)mbi->framebuffer_addr;
-	// framebuffer[8 * VGA_WIDTH + 8] = 4;
+	vga_buffer = (uint8_t *)mbi->framebuffer_addr;
+	//memset(vga_buffer, 0xF7, 64);
+
+	run_drawlogo();
 
 	FILE *file = fopen("/ETC/MOTD", "r");
 	kassert(file != NULL, "Motd file not found!");
@@ -112,7 +129,6 @@ void kmain(unsigned long magic, unsigned long addr) {
 	display_putch('\n');
 	fclose(file);
 
-	run_drawlogo();
     new_shell();
 
 	// This function not should be finished
