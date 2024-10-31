@@ -3,7 +3,7 @@
 
 #include <kernel.h>
 
-#include <drv/display.h>
+#include <drv/canvas.h>
 #include <drv/keyboard.h>
 #include <drv/serial.h>
 
@@ -26,5 +26,9 @@ int kprintf(char *fmt, ...);
 void kpanic(char* message);
 void kassert(bool is_ok, char* fail_message);
 void kreadl(char* input);
+
+void _putch(char ch);
+void _puts(char *str);
+void _newline();
 
 #endif
