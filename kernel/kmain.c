@@ -39,6 +39,137 @@ void run_drawlogo() {
     fillrect(vga_buffer, 255, 255, 255, 100, 100);
 }
 
+/* import our font that's in the object file we've created above */
+extern char _binary_system_8x16_psf_start;
+extern char _binary_system_8x16_psf_end;
+
+#define PSF1_FONT_MAGIC 0x0436
+
+typedef struct {
+    uint16_t magic; // Magic bytes for identification.
+    uint8_t fontMode; // PSF font mode.
+    uint8_t characterSize; // PSF character size.
+} PSF1_Header;
+
+
+#define PSF_FONT_MAGIC 0x864ab572
+
+typedef struct {
+    uint32_t magic;         /* magic bytes to identify PSF */
+    uint32_t version;       /* zero */
+    uint32_t headersize;    /* offset of bitmaps in file, 32 */
+    uint32_t flags;         /* 0 if there's no unicode table */
+    uint32_t numglyph;      /* number of glyphs */
+    uint32_t bytesperglyph; /* size of each glyph */
+    uint32_t height;        /* height in pixels */
+    uint32_t width;         /* width in pixels */
+} PSF_font;
+
+// FIXME
+#define USHRT_MAX 65535
+#define PIXEL uint32_t
+
+uint16_t *unicode;
+
+void psf_init()
+{
+    uint16_t glyph = 0;
+    /* cast the address to PSF header struct */
+    PSF_font *font = (PSF_font*)&_binary_system_8x16_psf_start;
+    /* is there a unicode table? */
+    if (font->flags) {
+        unicode = NULL;
+        return; 
+    }
+
+    /* get the offset of the table */
+    char *s = (char *)(
+    (unsigned char*)&_binary_system_8x16_psf_start +
+      font->headersize +
+      font->numglyph * font->bytesperglyph
+    );
+    /* allocate memory for translation table */
+    unicode = malloc(USHRT_MAX * 2);
+    while(s>_binary_system_8x16_psf_end) {
+        uint16_t uc = (uint16_t)((unsigned char *)s[0]);
+        if(uc == 0xFF) {
+            glyph++;
+            s++;
+            continue;
+        } else if(uc & 128) {
+            /* UTF-8 to unicode */
+            if((uc & 32) == 0 ) {
+                uc = ((s[0] & 0x1F)<<6)+(s[1] & 0x3F);
+                s++;
+            } else
+            if((uc & 16) == 0 ) {
+                uc = ((((s[0] & 0xF)<<6)+(s[1] & 0x3F))<<6)+(s[2] & 0x3F);
+                s+=2;
+            } else
+            if((uc & 8) == 0 ) {
+                uc = ((((((s[0] & 0x7)<<6)+(s[1] & 0x3F))<<6)+(s[2] & 0x3F))<<6)+(s[3] & 0x3F);
+                s+=3;
+            } else
+                uc = 0;
+        }
+        /* save translation */
+        unicode[uc] = glyph;
+        s++;
+    }
+}
+
+void putchar(
+	unsigned short int c, // WARN: It's not a char, it's unicode char
+	int cx, int cy,
+	uint32_t fg, uint32_t bg
+) {
+	PSF_font *font = (PSF_font*)&_binary_system_8x16_psf_start;
+
+	int pixelsize = bpp / 8;
+	int scanline = pitch;
+
+	// We need to know how many bytes encode one row
+	int bytesperline = (font->width+7) / 8;
+
+	// Unicode translation
+	if(unicode != NULL) {
+        c = unicode[c];
+    }
+
+	// Get the glyph for the character. If there's no
+    // glyph for a given character, we'll display the first glyph.
+	unsigned char *glyph = (unsigned char*)&_binary_system_8x16_psf_start +
+    	font->headersize +
+     	(c > 0 && c < font->numglyph ? c : 0) * font->bytesperglyph;
+
+	// Calculate the upper left corner on screen where we want to display.
+	// we only do this once, and adjust the offset later. This is faster.
+    int offs = (cy * font->height * scanline) +
+        ((cx) * (font->width + 1) * pixelsize);
+
+	// Finnaly, displaying pixels
+	int x, y, line, mask;
+
+	for(y = 0; y < font->height; y++) { 
+		// Save the starting position of the line
+        line = offs;
+        mask = 1 << (font->width - 1);
+
+		// Display a row
+        for(x = 0; x < font->width; x++){
+			if(glyph != 0)
+            *((PIXEL*)(vga_buffer + line)) = *((unsigned int*)glyph) & mask ? fg : bg;
+            /* adjust to the next pixel */
+            mask >>= 1;
+            line += pixelsize;
+        }
+
+		// Adjust to the next line */
+        glyph += bytesperline;
+        offs  += scanline;
+	}
+}
+
 void new_shell() {
 	char* input = malloc(sizeof(char) * 64);
 
@@ -73,6 +204,7 @@ void kmain(unsigned long magic, unsigned long addr) {
 	mm_init((uint32_t)_malloc_base);
 	serial_init();
     keyboard_init();
+	psf_init();
     display_init();
 	fat_init();
 
@@ -118,7 +250,12 @@ void kmain(unsigned long magic, unsigned long addr) {
 	vga_buffer = (uint8_t *)mbi->framebuffer_addr;
 	//memset(vga_buffer, 0xF7, 64);
 
-	run_drawlogo();
+	//run_drawlogo();
+	char* line = "Penis is big!";
+	for(int i = 0; i < 12; i++) {
+		if(line[i] == 0x00) break;
+		putchar(line[i], i + 1, 1, 0xFFFFFF, 0x000000);
+	}
 
 	// FIXME: Broken after last changes
 	// FILE *file = fopen("/ETC/MOTD", "r");
