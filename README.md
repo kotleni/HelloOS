@@ -21,16 +21,18 @@ apt install qemu-system-x86 gcc-multilib nasm
 Fedora:
 ```bash
 dnf install qemu glibc-devel nasm
+# and something else?
 ```
 
 Arch:
 ```bash
-pacman -Syu qemu-full base-devel nasm
+pacman -Syu qemu-full base-devel nasm mtools dosfstools
 ```
 
 MacOS:
 ```bash
 brew install x86_64-elf-gcc nasm qemu-system-x86
+# and something else?
 ```
 
 ### Build
