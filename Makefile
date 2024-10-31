@@ -25,7 +25,6 @@ pack:
 	
 	sudo cp -r build/grub/* build/fs/
 	sudo cp -r basefs/* build/fs/
-	sudo cp build/bootloaderefi.efi build/fs/boot/bootloaderefi.efi
 	sudo cp build/kernel build/fs/boot/kernel
 	sudo umount build/grub/
 	sudo umount build/fs/
