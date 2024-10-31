@@ -6,16 +6,16 @@ BASE_FS := basefs/
 GCC_BIN := i686-elf-gcc
 LD_BIN := i686-elf-ld
 
-GCC_ARGS := -m32 -I$(INC_DIR) -ffreestanding -nostdlib -nostartfiles
+GCC_ARGS := -m32 -I$(INC_DIR) -I/usr/include/efi/ -ffreestanding -nostdlib -nostartfiles
 
 all:
 	echo Use another target instead.
 
 qemu:
-	qemu-system-x86_64 -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF_CODE.fd
+	qemu-system-x86_64 -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF.fd -vga vmware
 
 pack:
-	grub-mkrescue -p /boot -o build/grub.iso --modules=multiboot
+	grub-mkrescue -p /boot -o build/grub.iso --modules="fat multiboot"
 	mkdir -p build/grub
 	sudo mount build/grub.iso build/grub
 	mkdir -p build/fs
