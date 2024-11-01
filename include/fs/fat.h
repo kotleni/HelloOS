@@ -1,6 +1,8 @@
 #ifndef H_FAT
 #define H_FAT
 
+// http://www.maverick-os.dk/FileSystemFormats/FAT16_FileSystem.html
+
 #include <types.h>
 #include <drv/ata.h>
 #include <misc/string.h>
@@ -8,80 +10,63 @@
 #include <misc/malloc.h>
 #include <kernel.h>
 
-typedef struct {
-    uint16_t bytes_per_sector;          // IMPORTANT
-    uint8_t sectors_per_cluster;        // IMPORTANT
-    uint16_t reserved_sectors;          // IMPORTANT
-    uint8_t FAT_count;                  // IMPORTANT
-    uint16_t dir_entries;
-    uint16_t total_sectors;
-    uint8_t media_descriptor_type;
-    uint16_t count_sectors_per_FAT12_16; // FAT12/FAT16 only.
-    uint16_t count_sectors_per_track;
-    uint16_t count_heads_or_sizes_on_media;
-    uint32_t count_hidden_sectors;
-    uint32_t large_sectors_on_media;  // This is set instead of total_sectors if it's > 65535
+struct bpb {
+    uint8_t jmp_bootstrap[3]; // Code to jump to the bootstrap code.
+    unsigned char oem_id[8]; // Oem ID - Name of the formatting OS
+    uint16_t bytes_per_sector; // Bytes per Sector
+    uint8_t sectors_per_claster; // Sectors per Cluster - Usual there is 512 bytes per sector.
+    uint16_t reserved_sectors; // Reserved sectors from the start of the volume.
 
-    // Extended Boot Record
-    uint32_t count_sectors_per_FAT32;   // IMPORTANT
-    uint16_t flags;
-    uint16_t FAT_version;
-    uint32_t cluster_number_root_dir;   // IMPORTANT
-    uint16_t sector_number_FSInfo;
-    uint16_t sector_number_backup_boot_sector;
-    uint8_t drive_number;
-    uint8_t windows_flags;
-    uint8_t signature;                  // IMPORTANT
-    uint32_t volume_id;
-    char volume_label[12];
-    char system_id[9];
-} bios_parameter_block;
+    uint8_t number_of_fat_copies; // Number of FAT copies - Usual 2 copies are used to prevent data loss.
+    uint16_t root_entries_count; // Number of possible root entries - 512 entries are recommended.
+    uint16_t total_sectors16; // Small number of sectors - Used when volume size is less than 32 Mb.
+    uint8_t media_descriptor; // Media Descriptor
+    uint16_t sectors_per_fat; // Sectors per FAT
+    uint16_t sectors_per_track; // Sectors per Track
+    uint16_t num_of_heads; // Number of Heads
+    uint32_t hidden_sectors; // Hidden Sectors
 
-#define READONLY  1
-#define HIDDEN    (1 << 1)
-#define SYSTEM    (1 << 2)
-#define VolumeID  (1 << 3)
-#define DIRECTORY (1 << 4)
-#define ARCHIVE   (1 << 5)
-#define LFN (READONLY | HIDDEN | SYSTEM | VolumeID)
+    uint32_t total_sectors32; // Large number of sectors - Used when volume size is greater than 32 Mb.
+    uint8_t drive_snum; // Drive Number - Used by some bootstrap code, fx. MS-DOS.
+    uint8_t reserved; // Is used by Windows NT to decide if it shall check disk integrity.
+    uint8_t extended_boot_signature; // Indicates that the next three fields are available.
+    uint32_t serial_number; // Volume Serial Number
+    unsigned char volume_label[11]; // Volume Label - Should be the same as in the root directory.
+    unsigned char fs_type[8]; // File System Type - The string should be 'FAT16'
+    uint8_t bootstrap[448]; // Bootstrap code - May schrink in the future.
+    uint16_t signature; // Boot sector signature - This is the AA55h signature.
+} __attribute__((packed));
+typedef struct bpb bpb_t;
 
-typedef struct {
-    char *name;
-    uint8_t dir_attrs;
-    uint32_t first_cluster;
-    uint32_t file_size;
-} dir_entry;
+struct dir {
+    unsigned char Name[11];
+    uint8_t Attr;
+    uint8_t NTRes;
+    uint8_t CrtTimeTenth;
+    uint16_t CrtTime;
 
-typedef struct {
-    uint32_t cluster;
-    dir_entry *entries;
-    uint32_t num_entries;
-} directory;
+    uint16_t CrtDate;
+    uint16_t LstAccDate;
+    uint16_t FstClusHI;
+    uint16_t WrtTime;
+    uint16_t WrtDate;
+    uint16_t FstClusLO;
+    uint32_t FileSize;
+} __attribute__((packed));
+typedef struct dir dir_t;
 
-// End Of Chain
-#define EOC 0x0FFFFFF8
-
-typedef struct {
-    //FILE *f;
-    uint32_t *FAT;
-    bios_parameter_block bpb;
-    uint32_t partition_begin_sector;
-    uint32_t fat_begin_sector;
-    uint32_t cluster_begin_sector;
-    uint32_t cluster_size;
-    uint32_t cluster_alloc_hint;
-} f32;
+enum dirattr {
+    DIR_ATTR_READONLY = 1 << 0,
+    DIR_ATTR_HIDDEN   = 1 << 1,
+    DIR_ATTR_SYSTEM   = 1 << 2,
+    DIR_ATTR_VOLUMEID = 1 << 3,
+    DIR_ATTR_DIRECTORY= 1 << 4,
+    DIR_ATTR_ARCHIVE  = 1 << 5,
+    DIR_ATTR_LFN      = 0xF
+};
+typedef enum dirattr dirattr_t;
 
 bool fat_init();
-f32 *fat_open(char *path);
-void fat_close(f32* fs);
 
-void free_directory(f32 *fs, directory *dir);
-void getCluster(f32 *fs, uint8_t *buff, uint32_t cluster_number);
-uint32_t get_next_cluster_id(f32 *fs, uint32_t cluster);
-
-// internal
-void populate_dir(f32 *fs, directory *dir, uint32_t cluster);
-void populate_root_dir(f32 *fs, directory *dir);
 
 #endif

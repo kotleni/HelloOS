@@ -20,7 +20,7 @@ pack:
 	sudo mount build/grub.iso build/grub
 	mkdir -p build/fs
 	dd if=/dev/zero of=$(BLD_DIR)/fs.img bs=512 count=184320
-	mkfs.fat -F 32 -n "DRIVE" $(BLD_DIR)/fs.img
+	mkfs.fat -F 16 -n "SYSTEM" $(BLD_DIR)/fs.img
 	sudo mount build/fs.img build/fs
 	
 	sudo cp -r build/grub/* build/fs/
