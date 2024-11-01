@@ -450,7 +450,7 @@ uint32_t count_free_clusters(f32 *fs) {
 }
 
 bool fat_init() {
-    
+    kprintf("FAT driver initialized.\n");
 }
 
 f32 *fat_open(char *path) {

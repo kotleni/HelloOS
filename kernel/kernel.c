@@ -67,8 +67,18 @@ int printf(char *fmt, ...) {
 }
 
 int kprintf(char *fmt, ...) {
-	_puts("[KERN] ");
-	return printf(fmt);
+    _puts("[KERN] ");
+    char buf[1024] = {-1};
+	va_list args;
+	va_start(args, fmt);
+	int out = vasprintf(buf, fmt, args);
+	/* We're done with our arguments */
+	va_end(args);
+    for(int i = 0; i < out; i += 1) {
+        _putch(buf[i]);
+		serial_writec(buf[i]);
+    }
+	return out;
 }
 
 void kpanic(char* message) {

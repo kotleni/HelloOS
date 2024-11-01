@@ -38,4 +38,6 @@ void keyboard_init() {
 
     k->num = -1;
     k->ascii = '?';
+    
+    kprintf("Kerboard driver initialized.\n");
 }

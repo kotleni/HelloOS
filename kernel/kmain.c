@@ -101,7 +101,7 @@ void new_shell() {
 		} else if(strcmp(cmd, "testdraw") == 0) {
 			test_drawing();
 		} else {
-			kprintf("Unknown command %s!\n", args[0]);
+			printf("Unknown command: %s\n", cmd);
 		}
 	}
 }
@@ -137,18 +137,19 @@ void kmain(unsigned long magic, unsigned long addr) {
 			mbi->framebuffer_bpp,
 			mbi->framebuffer_pitch
 		);
+
+        _clearscreen();
+        _resetline();
 	}
 	init_base();
 
-	kprintf("Started HelloOS v0.6\n");
+	kprintf("Kernel successful loaded\n");
 
 	FILE *file = fopen("/etc/motd", "r");
 	kassert(file != NULL, "Motd file not found!");
 	char buff[256];
 	fread(buff, 256, 1, file);
-	_putch('\n');
-	_puts(buff);
-	_putch('\n');
+    printf("\n%s\n", buff);
 	fclose(file);
 
     new_shell();
