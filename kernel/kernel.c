@@ -3,6 +3,22 @@
 int chx = 1;
 int chy = 1;
 
+int _outputfg = 0xFFFFFF;
+int _outputbg = 0x000000;
+
+void _setfg(int color) {
+	_outputfg = color;
+}
+
+void _setbg(int color) {
+	_outputbg = color;
+}
+
+void _resetcolors() {
+	_setbg(0x000000);
+    _setfg(0xFFFFFF);
+}
+
 void _putch(char ch) {
 	_putchnoswap(ch);
 	canvas_swap();
@@ -14,7 +30,7 @@ void _putchnoswap(char ch) {
 		return;
 	}
 
-	canvas_drawchar(ch, chx, chy, 0xFFFFFF, 0x000000);
+	canvas_drawchar(ch, chx, chy, _outputfg, _outputbg);
 	chx++;
 	// TODO
 }

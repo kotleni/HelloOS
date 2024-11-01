@@ -27,6 +27,9 @@ void kpanic(char* message);
 void kassert(bool is_ok, char* fail_message);
 void kreadl(char* input);
 
+void _setfg(int color);
+void _setbg(int color);
+void _resetcolors();
 void _putch(char ch);
 void _putchnoswap(char ch);
 void _puts(char *str);

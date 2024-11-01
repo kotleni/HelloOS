@@ -74,6 +74,66 @@ void test_drawing() {
 	}
 }
 
+void test_menu() {
+    struct menuentry {
+        char name[8];
+    };
+    struct menuentry entries[] = { 
+        {"Item 1"},
+        {"Item 2"},
+        {"Item 3"},
+        {"Exit"},
+    };
+    int selected = 0;
+
+    KeyboardKey* key;
+    bool isOpen = true;
+    while(isOpen) {
+        _clearscreen();
+        _resetline();
+
+        _setfg(0xF0F0F0);
+        printf("Test menu.\nUse ESQ to exit, W/S to move selection and enter to select.\n\n");
+        _resetcolors();
+
+        int p = 8;
+        for(int i = 0; i < 4; i++) {
+            // _setbg(0xFFFFFF);
+            // _setfg(0x000000);
+
+            if(i == selected)
+                printf("[%s]", entries[i].name);
+            else
+                printf("%s", entries[i].name);
+
+            _newline();
+            //_resetcolors();
+        }
+
+        key = keyboard_read();
+
+        switch (key->num)
+        {
+        case KEY_ESC:
+            isOpen = false;
+            break;
+        case KEY_W:
+            selected -= 1;
+            if(selected < 0) selected = 3;
+            break;
+        case KEY_S:
+            selected += 1;
+            if(selected >= 4) selected = 0;
+            break;
+        case KEY_ENTER:
+            if(selected == 3) isOpen = false;
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 void new_shell() {
 	char* input = malloc(sizeof(char) * 64);
 
@@ -100,6 +160,8 @@ void new_shell() {
 			print_bootinfo();
 		} else if(strcmp(cmd, "testdraw") == 0) {
 			test_drawing();
+		} else if(strcmp(cmd, "testmenu") == 0) {
+			test_menu();
 		} else {
 			printf("Unknown command: %s\n", cmd);
 		}
