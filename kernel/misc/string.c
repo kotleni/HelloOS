@@ -38,6 +38,56 @@ int strcmp(const char * str1, const char * str2) {
     return *str1 - *str2;
 }
 
+char *strncpy(char *dest, const char *src, size_t n) {
+    size_t i;
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        dest[i] = src[i];
+    }
+
+    for (; i < n; i++) {
+        dest[i] = '\0';
+    }
+
+    return dest;
+}
+
+
+char *strtok(char *str, const char *delim) {
+    static char *next;
+    if (str != NULL) {
+        next = str;
+    }
+    if (next == NULL) {
+        return NULL; // No more tokens
+    }
+
+    // Skip initial delimiters
+    char *start = next;
+    while (*start && strchr(delim, *start)) {
+        start++;
+    }
+
+    if (*start == '\0') {
+        next = NULL; // No more tokens
+        return NULL;
+    }
+
+    // Find the end of the token
+    char *end = start;
+    while (*end && !strchr(delim, *end)) {
+        end++;
+    }
+
+    if (*end == '\0') {
+        next = NULL; // No more tokens after this one
+    } else {
+        *end = '\0'; // Null-terminate the token
+        next = end + 1; // Move past the delimiter for the next call
+    }
+
+    return start;
+}
+
 // reverse string
 void reverse(char s[]){
     int i, j;
@@ -188,7 +238,7 @@ static void print_dec(unsigned int value, unsigned int width, char * buf, int * 
 /*
  * Hexadecimal to string
  */
-static void print_hex(unsigned int value, unsigned int width, char * buf, int * ptr) {
+void print_hex(unsigned int value, unsigned int width, char * buf, int * ptr) {
 	int i = width;
 
 	if (i == 0) i = 8;
@@ -213,6 +263,15 @@ static void print_hex(unsigned int value, unsigned int width, char * buf, int * 
 		value >>= 4;
 	}
 	*ptr += n_width;
+}
+
+void byte_to_hex(uint8_t byte, char *hex_str) {
+    char hex_lookup[] = "0123456789ABCDEF";
+
+    // Get the high and low nibbles (4 bits each)
+    hex_str[0] = hex_lookup[(byte >> 4) & 0x0F]; // High nibble
+    hex_str[1] = hex_lookup[byte & 0x0F];        // Low nibble
+    hex_str[2] = '\0';                           // Null-terminate the string
 }
 
 size_t vasprintf(char * buf, const char *fmt, va_list args) {

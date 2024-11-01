@@ -67,6 +67,10 @@ enum dirattr {
 typedef enum dirattr dirattr_t;
 
 bool fat_init();
-
+bool fat_list_root_files(bpb_t *bpb);
+bool fat_find_file(bpb_t *bpb, const char *path, dir_t *file_entry);
+bool fat_find_in_directory(bpb_t *bpb, uint32_t cluster, const char *name, dir_t *result);
+uint32_t get_cluster_sector(bpb_t *bpb, uint32_t cluster_number);
+uint32_t get_next_cluster(dir_t *entry);
 
 #endif
