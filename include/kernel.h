@@ -32,6 +32,7 @@ void _putchnoswap(char ch);
 void _puts(char *str);
 void _resetline();
 void _movecursor(int x, int y);
+void _pushcursor(int x, int y);
 void _newline();
 void _clearscreen();
 

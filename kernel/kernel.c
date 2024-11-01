@@ -37,6 +37,11 @@ void _movecursor(int x, int y) {
 	chy = y;
 }
 
+void _pushcursor(int x, int y) {
+	chx += x;
+	chy += y;
+}
+
 void _newline() {
 	chx = 0;
 	chy++;
@@ -116,9 +121,9 @@ void kreadl(char* input) {
             	cursor -= 1;
             	input[cursor] = '\0';
 
-            	//display_movecur(-1, 0);
-            	_putch('\0');
-            	//display_movecur(-1, 0);
+            	_pushcursor(-1, 0);
+            	_putch(' ');
+            	_pushcursor(-1, 0);
 				break;
 			default:
 				char str[2];
