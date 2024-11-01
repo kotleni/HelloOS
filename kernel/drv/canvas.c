@@ -4,6 +4,8 @@ canvas_t canvas;
 
 void canvas_init(uint8_t* framebuffer, int width, int height, int bpp, int pitch) {
     canvas.framebuffer = framebuffer;
+    int pixelwidth = bpp / 8;
+    canvas.backbuffer = (uint8_t*)malloc(sizeof(uint8_t) * (width*pixelwidth+height*pitch));
     canvas.width = width;
     canvas.height = height;
     canvas.bpp = bpp;
@@ -12,25 +14,32 @@ void canvas_init(uint8_t* framebuffer, int width, int height, int bpp, int pitch
     psf_load();
 }
 
+uint8_t* canvas_getbuffer() {
+    return canvas.backbuffer;
+}
+
+void canvas_swap() {
+    int pixelwidth = canvas.bpp / 8;
+    int len = (canvas.width*pixelwidth+canvas.height*canvas.pitch);
+    memcpy(canvas.framebuffer, canvas_getbuffer(), len);
+}
+
 void canvas_drawpixel(int x,int y, int color) {
 	int pixelwidth = canvas.bpp / 8;
 
     unsigned where = x*pixelwidth + y*canvas.pitch;
-    canvas.framebuffer[where] = color & 255;              // BLUE
-    canvas.framebuffer[where + 1] = (color >> 8) & 255;   // GREEN
-    canvas.framebuffer[where + 2] = (color >> 16) & 255;  // RED
+    canvas_getbuffer()[where] = color & 255;              // BLUE
+    canvas_getbuffer()[where + 1] = (color >> 8) & 255;   // GREEN
+    canvas_getbuffer()[where + 2] = (color >> 16) & 255;  // RED
 }
 
-void canvas_fillrect(unsigned char r, unsigned char g, unsigned char b, unsigned char w, unsigned char h) {
-    unsigned char *where = canvas.framebuffer;
+void canvas_fillrect(int x, int y, int w, int h, int color) {
+    unsigned char *where = canvas_getbuffer();
     int i, j;
 
     for (i = 0; i < w; i++) {
         for (j = 0; j < h; j++) {
-            canvas_drawpixel(j, i, (r << 16) + (g << 8) + b);
-            //where[j*pixelwidth] = r;
-            //where[j*pixelwidth + 1] = g;
-            //where[j*pixelwidth + 2] = b;
+            canvas_drawpixel(x + j, y + i, color);
         }
         where += canvas.pitch;
     }
@@ -76,7 +85,7 @@ void canvas_drawchar(
 		// Display a row
         for(x = 0; x < font->width; x++){
 			if(glyph != 0)
-            *((PIXEL*)(canvas.framebuffer + line)) = *((unsigned int*)glyph) & mask ? fg : bg;
+            *((PIXEL*)(canvas_getbuffer() + line)) = *((unsigned int*)glyph) & mask ? fg : bg;
             /* adjust to the next pixel */
             mask >>= 1;
             line += pixelsize;
@@ -88,13 +97,7 @@ void canvas_drawchar(
 	}
 }
 
-void projectPoint(float projectionDistance, float scale, Vec3D point, int *x, int *y) {
-    float factor = projectionDistance / (projectionDistance + point.z);
-    *x = (int)(point.x * factor * scale + canvas.width / 2);
-    *y = (int)(point.y * factor * scale + canvas.height / 2);
-}
-
-void drawLine(int x0, int y0, int x1, int y1, int color) {
+void canvas_drawline(int x0, int y0, int x1, int y1, int color) {
     int dx = x1 > x0 ? (x1 - x0) : (x0 - x1);
     int dy = y1 > y0 ? (y1 - y0) : (y0 - y1);
     int sx = x0 < x1 ? 1 : -1;
@@ -108,4 +111,10 @@ void drawLine(int x0, int y0, int x1, int y1, int color) {
         if (e2 > -dy) { err -= dy; x0 += sx; }
         if (e2 < dx) { err += dx; y0 += sy; }
     }
+}
+
+void canvas_projectpoint(float projectionDistance, float scale, Vec3D point, int *x, int *y) {
+    float factor = projectionDistance / (projectionDistance + point.z);
+    *x = (int)(point.x * factor * scale + canvas.width / 2);
+    *y = (int)(point.y * factor * scale + canvas.height / 2);
 }

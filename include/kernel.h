@@ -28,7 +28,10 @@ void kassert(bool is_ok, char* fail_message);
 void kreadl(char* input);
 
 void _putch(char ch);
+void _putchnoswap(char ch);
 void _puts(char *str);
+void _resetline();
+void _movecursor(int x, int y);
 void _newline();
 void _clearscreen();
 

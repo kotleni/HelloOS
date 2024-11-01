@@ -4,6 +4,11 @@ int chx = 1;
 int chy = 1;
 
 void _putch(char ch) {
+	_putchnoswap(ch);
+	canvas_swap();
+}
+
+void _putchnoswap(char ch) {
 	if(ch == '\n') {
 		_newline();
 		return;
@@ -17,8 +22,19 @@ void _putch(char ch) {
 void _puts(char *str) {
 	int len = strlen(str);
 	for(int i = 0; i < len; i++) {
-		_putch(str[i]);
+		_putchnoswap(str[i]);
 	}
+	canvas_swap();
+}
+
+void _resetline() {
+	chx = 0;
+	chy = 0;
+}
+
+void _movecursor(int x, int y) {
+	chx = x;
+	chy = y;
 }
 
 void _newline() {
@@ -27,11 +43,13 @@ void _newline() {
 }
 
 void _clearscreen() {
+	// TODO: Rewrite to memset?
 	for(int x = 0; x < canvas.width; x++) {
 		for(int y = 0; y < canvas.height; y++) {
 			canvas_drawpixel(x, y, 0x000000);
 		}
 	}
+	canvas_swap();
 }
 
 int printf(char *fmt, ...) {
