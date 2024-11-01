@@ -6,6 +6,74 @@ extern uint8_t _kernel_base[];
 extern uint8_t _malloc_base[];
 multiboot_info_t *mbi;
 
+#define MULTIBOOT_CHECK_FLAG(flags, flag) (((flags) & (flag)) == (flag))
+
+void print_bootinfo() {
+	printf("[BOOTLOADER REPORTED INFO]\n");
+
+	printf("Bootloader: %s\n", mbi->boot_loader_name);
+
+	printf("Kernel base addr: 0x%x\n", _kernel_base);
+	printf("Kernel end addr: 0x%x\n", _malloc_base);
+
+	printf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
+
+	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_FRAMEBUFFER_INFO)) {
+		printf("Framebuffer info:\n");
+		printf("  ptr:  : 0x%x\n", mbi->framebuffer_addr);
+		printf("  size  : %dx%d\n", mbi->framebuffer_width, mbi->framebuffer_height);
+		printf("  pitch : %d\n", mbi->framebuffer_pitch);
+		printf("  bpp   : %d\n", mbi->framebuffer_bpp);
+	}
+
+	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_FRAMEBUFFER_INFO)) {
+		printf("VBE mode: 0x%x\n", mbi->vbe_mode);
+	}
+
+	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_CMDLINE)) {
+		printf("Kernel arguments: %s\n", mbi->cmdline);
+	}
+}
+
+void test_drawing() {
+    int ballx = 5;
+    int bally = 5;
+    int speedx = 5;
+    int speedy = 5;
+    int scale = 8;
+
+    int width = canvas.width / scale;
+    int height = canvas.height / scale;
+
+    for(float x = 0; x < 512; x++) {
+		_clearscreen();
+
+        canvas_drawline(4, 4, canvas.width - 4, 4, 0xFFFFFF);
+        canvas_drawline(4, 4, 4, canvas.height - 4, 0xFFFFFF);
+        canvas_drawline(4, canvas.height - 4, canvas.width - 4, canvas.height - 4, 0xFFFFFF);
+        canvas_drawline(canvas.width - 4, 4, canvas.width - 4, canvas.height - 4, 0xFFFFFF);
+
+        canvas_fillrect(ballx * scale, bally * scale, scale, scale, 0x00FFFF);
+
+        _movecursor(2, 1);
+        printf("Pong");
+        
+        canvas_swap();
+
+        ballx += speedx;
+        bally += speedy;
+
+        if(ballx <= 0)
+            speedx = 1;
+        if(ballx >= width)
+            speedx = -1;
+        if(bally <= 0)
+            speedy = 1;
+        if(bally >= height)
+            speedy = -1;
+	}
+}
+
 void new_shell() {
 	char* input = malloc(sizeof(char) * 64);
 
@@ -13,14 +81,14 @@ void new_shell() {
 	
 	for(;;) {
 		// Show shell prefix
-		display_puts((char*) SHELL_PROMPT);
+		_puts((char*) SHELL_PROMPT);
 
 		// Clear input string
 		memset(input, 0x00, sizeof(char) * 64);
 
 		// Read line from input
 		kreadl(input);
-		display_putch('\n');
+		_newline();
 
 		// Parse arguments
 		char** args;
@@ -28,42 +96,61 @@ void new_shell() {
 		parse_args(input, &argc, args);
         char* cmd = trim(args[0]);
 
-		if(strcmp(cmd, "info") == 0) {
-			
+		if(strcmp(cmd, "bootinfo") == 0) {
+			print_bootinfo();
+		} else if(strcmp(cmd, "testdraw") == 0) {
+			test_drawing();
 		} else {
 			kprintf("Unknown command %s!\n", args[0]);
 		}
 	}
 }
 
-void kmain(unsigned long magic, unsigned long addr) {
+/* Init early stuff */
+void init_early() {
 	mm_init((uint32_t)_malloc_base);
 	serial_init();
-    keyboard_init();
-    display_init();
+}
+
+void init_base() {
+	keyboard_init();
 	fat_init();
+}
 
-  	/* Check multiboot magic */
-  	if(magic != MULTIBOOT_BOOTLOADER_MAGIC)
-    {
-      kprintf("Magic number is 0x%x, but expect 0x%x\n", (unsigned) magic, MULTIBOOT_BOOTLOADER_MAGIC);
-      kpanic("Invalid magic number!");
-    }
+void kmain(unsigned long magic, unsigned long addr) {
+	init_early();
+	{
+		/* Check multiboot magic */
+  		if(magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+			// This panic can be seen only in serial port
+			// Because canvas isn't initialized yet
+      		kprintf("Magic number is 0x%x, but expect 0x%x\n", (unsigned) magic, MULTIBOOT_BOOTLOADER_MAGIC);
+      		kpanic("Invalid multiboot magic number!");
+    	}
 
-  	mbi = (multiboot_info_t *) addr;
-	
-	kprintf("Kernel base addr: 0x%x\n", _kernel_base);
-	kprintf("Kernel end addr: 0x%x\n", _malloc_base);
-	kprintf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
+  		mbi = (multiboot_info_t *) addr;
 
-	FILE *file = fopen("/ETC/MOTD", "r");
-	kassert(file != NULL, "Motd file not found!");
-	char buff[256];
-	fread(buff, 256, 1, file);
-	display_putch('\n');
-	display_puts(buff);
-	display_putch('\n');
-	fclose(file);
+    	canvas_init(
+			(uint8_t*)mbi->framebuffer_addr,
+			mbi->framebuffer_width,
+			mbi->framebuffer_height,
+			mbi->framebuffer_bpp,
+			mbi->framebuffer_pitch
+		);
+	}
+	init_base();
+
+	kprintf("Started HelloOS v0.6\n");
+
+	// FIXME: Broken after last changes
+	// FILE *file = fopen("/ETC/MOTD", "r");
+	// kassert(file != NULL, "Motd file not found!");
+	// char buff[256];
+	// fread(buff, 256, 1, file);
+	// display_putch('\n');
+	// display_puts(buff);
+	// display_putch('\n');
+	// fclose(file);
 
     new_shell();
 
