@@ -470,7 +470,7 @@ f32 *fat_open(char *path) {
         return NULL;
     }
 
-    kprintf("Sectors per cluster: %d\n", fs->bpb.sectors_per_cluster);
+    // kprintf("Sectors per cluster: %d\n", fs->bpb.sectors_per_cluster);
 
     fs->partition_begin_sector = 0;
     fs->fat_begin_sector = fs->partition_begin_sector + fs->bpb.reserved_sectors;

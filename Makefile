@@ -12,7 +12,7 @@ all:
 	echo Use another target instead.
 	
 qemu:
-	qemu-system-x86_64 -nodefaults -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF.fd -vga std -machine "q35,accel=kvm:tcg" -serial stdio
+	qemu-system-x86_64 -nodefaults -m 512 -drive file=build/fs.img,index=0,if=ide,format=raw -bios /usr/share/ovmf/x64/OVMF.fd -vga std -serial stdio
 
 pack:
 	grub-mkrescue -p /boot -o build/grub.iso --modules="fat multiboot chain"

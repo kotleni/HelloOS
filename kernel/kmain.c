@@ -142,15 +142,14 @@ void kmain(unsigned long magic, unsigned long addr) {
 
 	kprintf("Started HelloOS v0.6\n");
 
-	// FIXME: Broken after last changes
-	// FILE *file = fopen("/ETC/MOTD", "r");
-	// kassert(file != NULL, "Motd file not found!");
-	// char buff[256];
-	// fread(buff, 256, 1, file);
-	// display_putch('\n');
-	// display_puts(buff);
-	// display_putch('\n');
-	// fclose(file);
+	FILE *file = fopen("/etc/motd", "r");
+	kassert(file != NULL, "Motd file not found!");
+	char buff[256];
+	fread(buff, 256, 1, file);
+	_putch('\n');
+	_puts(buff);
+	_putch('\n');
+	fclose(file);
 
     new_shell();
 
