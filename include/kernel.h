@@ -30,5 +30,6 @@ void kreadl(char* input);
 void _putch(char ch);
 void _puts(char *str);
 void _newline();
+void _clearscreen();
 
 #endif

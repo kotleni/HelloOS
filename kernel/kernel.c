@@ -26,6 +26,14 @@ void _newline() {
 	chy++;
 }
 
+void _clearscreen() {
+	for(int x = 0; x < canvas.width; x++) {
+		for(int y = 0; y < canvas.height; y++) {
+			canvas_drawpixel(x, y, 0x000000);
+		}
+	}
+}
+
 int printf(char *fmt, ...) {
 	char buf[1024] = {-1};
 	va_list args;
