@@ -35,13 +35,6 @@ void print_bootinfo() {
 	}
 }
 
-typedef struct {
-    float x, y, z;
-} Vec3D;
-
-typedef struct {
-    int start, end;
-} Edge;
 
 // Define the cube vertices (scaled and centered)
 Vec3D cubeVertices[8] = {
@@ -55,17 +48,6 @@ Edge cubeEdges[12] = {
     {4, 5}, {5, 6}, {6, 7}, {7, 4},  // Front face edges
     {0, 4}, {1, 5}, {2, 6}, {3, 7}   // Connecting edges between faces
 };
-
-// Approximate sine and cosine using Taylor series for small angles
-float sin(float angle) {
-    float angle3 = angle * angle * angle;
-    return angle - (angle3 / 6.0f);  // Approximation of sine (angle - angle^3 / 3!)
-}
-
-float cos(float angle) {
-    float angle2 = angle * angle;
-    return 1.0f - (angle2 / 2.0f);  // Approximation of cosine (1 - angle^2 / 2!)
-}
 
 // Parameters
 float projectionDistance = 2.5;  // Distance to projection plane
@@ -85,34 +67,104 @@ int getShadowedColor(float z) {
     return (brightness << 16) | (brightness << 8) | brightness;
 }
 
-// Project 3D points to 2D screen coordinates
-void projectPoint(Vec3D point, int *x, int *y) {
-    float factor = projectionDistance / (projectionDistance + point.z);
-    *x = (int)(point.x * factor * cubeSize + canvas.width / 2);
-    *y = (int)(point.y * factor * cubeSize + canvas.height / 2);
-}
+// Draw a 3D cube by projecting and connecting vertices
+// Define the six faces of the cube using vertex indices
+int cubeFaces[6][4] = {
+    {0, 1, 2, 3},  // Back face
+    {4, 5, 6, 7},  // Front face
+    {0, 1, 5, 4},  // Bottom face
+    {2, 3, 7, 6},  // Top face
+    {1, 2, 6, 5},  // Right face
+    {0, 3, 7, 4}   // Left face
+};
 
-// Draw line function using Bresenham's algorithm
-void drawLine(int x0, int y0, int x1, int y1, int color) {
-    int dx = x1 > x0 ? (x1 - x0) : (x0 - x1);
-    int dy = y1 > y0 ? (y1 - y0) : (y0 - y1);
-    int sx = x0 < x1 ? 1 : -1;
-    int sy = y0 < y1 ? 1 : -1;
-    int err = dx - dy;
+// Function to draw a polygon face of the cube
+void drawPolygon(Vec3D *vertices, int *faceIndices, int vertexCount) {
+    for (int i = 0; i < vertexCount; i++) {
+        int startIdx = faceIndices[i];
+        int endIdx = faceIndices[(i + 1) % vertexCount];  // Wrap around to form a closed shape
 
-    while (1) {
-        canvas_drawpixel(x0, y0, color);
-        if (x0 == x1 && y0 == y1) break;
-        int e2 = err * 2;
-        if (e2 > -dy) { err -= dy; x0 += sx; }
-        if (e2 < dx) { err += dx; y0 += sy; }
+        int x0, y0, x1, y1;
+        projectPoint(projectionDistance, cubeSize, vertices[startIdx], &x0, &y0);
+        projectPoint(projectionDistance, cubeSize, vertices[endIdx], &x1, &y1);
+
+        // Calculate the average depth (z) for the edge
+        float avgZ = (vertices[startIdx].z + vertices[endIdx].z) / 2.0f;
+
+        // Get shadowed color based on depth
+        int shadowedColor = getShadowedColor(avgZ);
+
+        drawLine(x0, y0, x1, y1, shadowedColor);
     }
 }
 
-// Draw a 3D cube by projecting and connecting vertices
+// Helper function to sort vertices by y-coordinate
+void sortVerticesByY(int *x, int *y, float *z, int count) {
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (y[j] > y[j + 1]) {
+                int tempX = x[j], tempY = y[j];
+                float tempZ = z[j];
+                x[j] = x[j + 1]; y[j] = y[j + 1]; z[j] = z[j + 1];
+                x[j + 1] = tempX; y[j + 1] = tempY; z[j + 1] = tempZ;
+            }
+        }
+    }
+}
+
+int getInterpolatedColor(float z) {
+    float minZ = -2.0f;
+    float maxZ = 2.0f;
+    int brightness = (int)(255 * (maxZ - z) / (maxZ - minZ));
+    if (brightness < 0) brightness = 0;
+    if (brightness > 255) brightness = 255;
+    return (brightness << 16) | (brightness << 8) | brightness;
+}
+
+// Function to fill a polygon face
+void drawFilledPolygon(Vec3D *vertices, int *faceIndices, int vertexCount) {
+    int x[vertexCount], y[vertexCount];
+    float z[vertexCount];
+    
+    // Project vertices to 2D screen coordinates
+    for (int i = 0; i < vertexCount; i++) {
+        projectPoint(projectionDistance, cubeSize, vertices[faceIndices[i]], &x[i], &y[i]);
+        z[i] = vertices[faceIndices[i]].z;
+    }
+
+    // Sort vertices by y-coordinate
+    sortVerticesByY(x, y, z, vertexCount);
+
+    // Scanline fill
+    for (int j = y[0]; j <= y[vertexCount - 1]; j++) {
+        // Find left and right x-coordinates for each scanline
+        float startX = x[0], endX = x[0];
+        float startZ = z[0], endZ = z[0];
+        
+        for (int i = 0; i < vertexCount; i++) {
+            if (y[i] <= j && y[(i + 1) % vertexCount] >= j) {
+                float t = (float)(j - y[i]) / (y[(i + 1) % vertexCount] - y[i]);
+                float xi = x[i] + t * (x[(i + 1) % vertexCount] - x[i]);
+                float zi = z[i] + t * (z[(i + 1) % vertexCount] - z[i]);
+                if (xi < startX) { startX = xi; startZ = zi; }
+                if (xi > endX) { endX = xi; endZ = zi; }
+            }
+        }
+
+        // Interpolate color across the line
+        for (int xPos = (int)startX; xPos <= (int)endX; xPos++) {
+            float zPos = startZ + (xPos - startX) * (endZ - startZ) / (endX - startX);
+            int color = getInterpolatedColor(zPos);
+            canvas_drawpixel(xPos, j, color);
+        }
+    }
+}
+
+// Main function to draw the cube by drawing each face as a polygon
 void drawCube(float angleX, float angleY) {
     Vec3D transformedVertices[8];
 
+    // Transform each vertex according to the angles
     for (int i = 0; i < 8; i++) {
         // Rotate around X axis
         float x = cubeVertices[i].x;
@@ -129,24 +181,12 @@ void drawCube(float angleX, float angleY) {
         transformedVertices[i].z = z2;
     }
 
-    // Draw edges between transformed vertices
-    for (int i = 0; i < 12; i++) {
-        int startIdx = cubeEdges[i].start;
-        int endIdx = cubeEdges[i].end;
-
-        int x0, y0, x1, y1;
-        projectPoint(transformedVertices[startIdx], &x0, &y0);
-        projectPoint(transformedVertices[endIdx], &x1, &y1);
-
-		/// Calculate the average depth (z) for the edge
-        float avgZ = (transformedVertices[startIdx].z + transformedVertices[endIdx].z) / 2.0f;
-
-        // Get shadowed color based on depth
-        int shadowedColor = getShadowedColor(avgZ);
-
-        drawLine(x0, y0, x1, y1, shadowedColor);  // Cyan color
+    // Draw each face of the cube as a polygon
+    for (int i = 0; i < 6; i++) {
+        drawFilledPolygon(transformedVertices, cubeFaces[i], 4);  // Each face has 4 vertices
     }
 }
+
 
 void test_drawcube() {
 	float max = 1.8f;
