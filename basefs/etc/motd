@@ -1,4 +1,4 @@
 Welcome to HelloOS (x86_64)
 * Github:    https://github.com/kotleni/HelloOS
 * Downloads: https://github.com/kotleni/HelloOS/releases
-Available commands: bootinfo, testdraw
+Available commands: bootinfo, testdraw, testmenu
