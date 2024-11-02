@@ -186,9 +186,35 @@ void new_shell() {
 }
 
 /* Init early stuff */
-void init_early() {
+void init_early(unsigned long magic, unsigned long addr) {
+    serial_init(); // Serial can work without anything
+
+    /* Check multiboot magic */
+  	if(magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+		// This panic can be seen only in serial port
+		// Because canvas isn't initialized yet
+      	kprintf("Magic number is 0x%x, but expect 0x%x\n", (unsigned) magic, MULTIBOOT_BOOTLOADER_MAGIC);
+      	kpanic("Invalid multiboot magic number!");
+    }
+
+  	mbi = (multiboot_info_t *) addr;
+
+    /* Loop through the memory map and display the values */
+    int totalSize = 0;
+    int i;
+    for(i = 0; i < mbi->mmap_length; i += sizeof(multiboot_memory_map_t)) {
+        multiboot_memory_map_t* mmmt = 
+            (multiboot_memory_map_t*) (mbi->mmap_addr + i);
+
+        printf("Start Addr: %x | Length: %x | Size: %x | Type: %d\n",
+           mmmt->addr, mmmt->len, mmmt->size, mmmt->type);
+
+        if(mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            totalSize += mmmt->len;
+        }
+    }
+
 	mm_init((uint32_t)_malloc_base);
-	serial_init();
 }
 
 void init_base() {
@@ -197,18 +223,8 @@ void init_base() {
 }
 
 void kmain(unsigned long magic, unsigned long addr) {
-	init_early();
-	{
-		/* Check multiboot magic */
-  		if(magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-			// This panic can be seen only in serial port
-			// Because canvas isn't initialized yet
-      		kprintf("Magic number is 0x%x, but expect 0x%x\n", (unsigned) magic, MULTIBOOT_BOOTLOADER_MAGIC);
-      		kpanic("Invalid multiboot magic number!");
-    	}
-
-  		mbi = (multiboot_info_t *) addr;
-
+	init_early(magic, addr);
+    {
     	canvas_init(
 			(uint8_t*)mbi->framebuffer_addr,
 			mbi->framebuffer_width,
@@ -233,6 +249,7 @@ void kmain(unsigned long magic, unsigned long addr) {
 	    fclose(file);
     }
 
+    motd();
     motd();
 
     new_shell();
