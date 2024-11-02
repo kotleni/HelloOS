@@ -16,7 +16,7 @@ void print_bootinfo() {
 	printf("Kernel base addr: 0x%x\n", _kernel_base);
 	printf("Kernel end addr: 0x%x\n", _malloc_base);
 
-	printf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
+	// printf("Available RAM: %dmb\n", mbi->mem_upper / 1024);
 
 	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_FRAMEBUFFER_INFO)) {
 		printf("Framebuffer info:\n");
@@ -33,6 +33,23 @@ void print_bootinfo() {
 	if(MULTIBOOT_CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_CMDLINE)) {
 		printf("Kernel arguments: %s\n", mbi->cmdline);
 	}
+
+    /* Loop through the memory map and display the values */
+    int totalSize = 0;
+    int i;
+    for(i = 0; i < mbi->mmap_length; i += sizeof(multiboot_memory_map_t)) {
+        multiboot_memory_map_t* mmmt = 
+            (multiboot_memory_map_t*) (mbi->mmap_addr + i);
+
+        //printf("Start Addr: %x | Length: %x | Size: %x | Type: %d\n",
+           // mmmt->addr, mmmt->len, mmmt->size, mmmt->type);
+
+        if(mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            totalSize += mmmt->len;
+        }
+    }
+
+    printf("Total memory map size: %dMB\n", totalSize / 1024 / 1024);
 }
 
 void test_drawing() {
@@ -207,12 +224,16 @@ void kmain(unsigned long magic, unsigned long addr) {
 
 	kprintf("Kernel successful loaded\n");
 
-	FILE *file = fopen("/etc/motd", "r");
-	kassert(file != NULL, "Motd file not found!");
-	char buff[256];
-	fread(buff, 256, 1, file);
-    printf("\n%s\n", buff);
-	fclose(file);
+	void motd() {
+        FILE *file = fopen("/etc/motd", "r");
+	    kassert(file != NULL, "Motd file not found!");
+	    char buff[256];
+	    fread(buff, 256, 1, file);
+        printf("\n%s\n", buff);
+	    fclose(file);
+    }
+
+    motd();
 
     new_shell();
 
